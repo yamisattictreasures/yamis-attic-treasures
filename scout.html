@@ -320,6 +320,25 @@
           <button id="btn-chat-remove-attachment" class="text-rose-400 hover:text-rose-300 px-2 py-1 text-xs">✕ Remove</button>
         </div>
 
+        <!-- Quick Gemini API Key Setup Banner (Shows if key missing) -->
+        <div id="scout-key-banner" class="hidden p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/90 via-[#22140a] to-[#1a0f07] border-2 border-amber-500/60 shadow-xl space-y-2.5">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">🔑</span>
+            <div>
+              <h4 class="font-bold text-xs sm:text-sm text-white flex items-center gap-1.5">
+                Gemini Vision Key Required for Instant Scouting
+              </h4>
+              <p class="text-[11px] text-amber-200/80">Paste your free Google Gemini API key once below to activate instant identification:</p>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row items-center gap-2">
+            <input type="password" id="scout-api-key-input" placeholder="Paste AIzaSy... key here" class="w-full bg-[#120c08] border border-amber-700/60 rounded-xl px-3.5 py-2 text-xs text-white font-mono focus:outline-none focus:border-amber-400">
+            <button type="button" id="btn-save-scout-key" class="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black rounded-xl text-xs shadow-md transition active:scale-95 whitespace-nowrap">
+              Activate Key 🚀
+            </button>
+          </div>
+        </div>
+
         <!-- Single-Line Scout Input & Submit Bar -->
         <div class="flex items-center gap-2 bg-[#120c08] p-2 rounded-xl border border-amber-800/40 focus-within:border-amber-500/70 shadow-inner">
           <input type="text" id="chat-input-text" class="flex-1 bg-transparent border-0 text-xs sm:text-sm text-[#f7edd8] placeholder-amber-200/40 focus:outline-none px-2" placeholder="Optional notes (e.g. asking $10, marked on bottom)... or just tap Scout!">
@@ -1276,6 +1295,12 @@
     try {
       const savedSettings = localStorage.getItem('yami_settings');
       if (savedSettings) state.settings = Object.assign(state.settings, JSON.parse(savedSettings));
+
+      // Standalone backup recovery for geminiKey
+      const standaloneKey = localStorage.getItem('yami_gemini_api_key') || sessionStorage.getItem('yami_gemini_api_key');
+      if (standaloneKey && !standaloneKey.startsWith('http') && !standaloneKey.startsWith('AKfyc')) {
+        state.settings.geminiKey = standaloneKey;
+      }
 
       const savedQueue = localStorage.getItem('yami_queue');
       if (savedQueue) state.queue = JSON.parse(savedQueue);
@@ -2416,7 +2441,9 @@ Category: ${document.getElementById('spec-category').value}`;
       setVal('set-handling-policy', set.handlingPolicy || "1-Business Day Handling • Carefully Packed & Double-Boxed");
       setVal('set-return-policy', set.returnPolicy || "30-Day Domestic Returns • Buyer Pays Return Shipping");
       setVal('set-gdrive-webhook', set.gdriveWebhook || '');
-      setVal('set-gemini-key', set.geminiKey || '');
+      const activeKey = getActiveGeminiKey() || set.geminiKey || '';
+      setVal('set-gemini-key', activeKey);
+      setVal('scout-api-key-input', activeKey);
 
       const autoSyncCheck = document.getElementById('set-gdrive-autosync');
       if (autoSyncCheck) autoSyncCheck.checked = !!set.gdriveAutosync;
@@ -3112,16 +3139,86 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
     const headerChatBtn = document.getElementById('btn-header-chat');
     const visionChatBtn = document.getElementById('btn-vision-chat');
 
+    function getActiveGeminiKey() {
+      let k = (state.settings.geminiKey || '').trim();
+      if (!k || k.startsWith('http') || k.startsWith('AKfyc')) {
+        try { k = (localStorage.getItem('yami_gemini_api_key') || '').trim(); } catch (e) {}
+      }
+      if (!k || k.startsWith('http') || k.startsWith('AKfyc')) {
+        try { k = (sessionStorage.getItem('yami_gemini_api_key') || '').trim(); } catch (e) {}
+      }
+      if (!k || k.startsWith('http') || k.startsWith('AKfyc')) {
+        const setInp = document.getElementById('set-gemini-key');
+        if (setInp && setInp.value) k = setInp.value.trim();
+      }
+      if (!k || k.startsWith('http') || k.startsWith('AKfyc')) {
+        const scoutInp = document.getElementById('scout-api-key-input');
+        if (scoutInp && scoutInp.value) k = scoutInp.value.trim();
+      }
+
+      if (k && !k.startsWith('http') && !k.startsWith('AKfyc')) {
+        state.settings.geminiKey = k;
+        try {
+          localStorage.setItem('yami_gemini_api_key', k);
+          sessionStorage.setItem('yami_gemini_api_key', k);
+        } catch (e) {}
+        return k;
+      }
+      return null;
+    }
+
+    function saveGeminiApiKey(enteredKey, showConfirmation = true) {
+      if (!enteredKey) return false;
+      const key = enteredKey.trim();
+
+      if (key.startsWith('http') || key.startsWith('AKfyc')) {
+        showToast("That's an Apps Script URL, not a Gemini API key!", "⚠️");
+        return false;
+      }
+
+      state.settings.geminiKey = key;
+      try {
+        localStorage.setItem('yami_gemini_api_key', key);
+        sessionStorage.setItem('yami_gemini_api_key', key);
+        localStorage.setItem('yami_settings', JSON.stringify(state.settings));
+      } catch (e) {
+        console.warn("Storage write error:", e);
+      }
+
+      const setInp = document.getElementById('set-gemini-key');
+      if (setInp) setInp.value = key;
+
+      const scoutInp = document.getElementById('scout-api-key-input');
+      if (scoutInp) scoutInp.value = key;
+
+      updateChatKeyBadge();
+      if (showConfirmation) {
+        showToast("Gemini Vision Key saved permanently! 🚀", "✅");
+      }
+      return true;
+    }
+
     function updateChatKeyBadge() {
-      if (!chatKeyBadge) return;
-      const key = (state.settings.geminiKey || '').trim();
-      if (key && !key.startsWith('http') && !key.startsWith('AKfyc')) {
-        chatKeyBadge.textContent = "Gemini Vision Active 🟢";
-        chatKeyBadge.className = "text-emerald-400 font-mono";
+      const key = getActiveGeminiKey();
+      const banner = document.getElementById('scout-key-banner');
+      if (key) {
+        if (chatKeyBadge) {
+          chatKeyBadge.textContent = "Gemini Vision Active 🟢";
+          chatKeyBadge.className = "text-emerald-400 font-mono";
+          chatKeyBadge.onclick = null;
+        }
+        if (banner) banner.classList.add('hidden');
       } else {
-        chatKeyBadge.textContent = "Key Needed in Settings ⚠️";
-        chatKeyBadge.className = "text-amber-400 font-mono cursor-pointer underline";
-        chatKeyBadge.onclick = () => switchTab('settings');
+        if (chatKeyBadge) {
+          chatKeyBadge.textContent = "Key Needed ⚠️";
+          chatKeyBadge.className = "text-amber-400 font-mono cursor-pointer underline";
+          chatKeyBadge.onclick = () => {
+            if (banner) banner.classList.remove('hidden');
+            const inp = document.getElementById('scout-api-key-input');
+            if (inp) inp.focus();
+          };
+        }
+        if (banner) banner.classList.remove('hidden');
       }
     }
 
@@ -3408,10 +3505,9 @@ Here is what I can do for you right here in the field:
 
       if (!text && currentPhotos.length === 0) return;
 
-      const rawKey = state.settings.geminiKey || (document.getElementById('set-gemini-key') ? document.getElementById('set-gemini-key').value : '');
-      const key = (rawKey || '').trim();
+      const key = getActiveGeminiKey();
 
-      if (!key || key.startsWith('http') || key.startsWith('AKfyc')) {
+      if (!key) {
         state.chatHistory.push({
           id: Date.now(),
           role: 'user',
@@ -3423,7 +3519,7 @@ Here is what I can do for you right here in the field:
         state.chatHistory.push({
           id: Date.now() + 1,
           role: 'model',
-          text: `**API Key Required for Live Chat & Scouting** ⚠️\n\nTo scout live and get instant vintage appraisals with Google Search grounding, please paste your free Google Gemini API key into the **Settings** (⚙️) tab!\n\n1. Get a 100% free key from [Google AI Studio](https://aistudio.google.com/app/apikey).\n2. Paste it into the Gemini API Key field in **Settings**.\n3. Click **Save Settings** and come right back here to scout!`,
+          text: `**Gemini Vision Key Required** ⚠️\n\nPlease paste your free Google Gemini API key into the golden box at the top of Sourcing Scout (or under Settings) and tap **Activate Key**!\n\n1. Get a 100% free key from [Google AI Studio](https://aistudio.google.com/app/apikey).\n2. Paste it in the **Gemini Vision Key** box above.\n3. Tap **Activate Key 🚀** to start live scanning!`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
         renderChatMessages();
@@ -3432,6 +3528,16 @@ Here is what I can do for you right here in the field:
         state.chatAttachedPhoto = null;
         renderPhotoTray();
         if (chatAttachPreview) chatAttachPreview.classList.add('hidden');
+
+        const banner = document.getElementById('scout-key-banner');
+        if (banner) {
+          banner.classList.remove('hidden');
+          const inp = document.getElementById('scout-api-key-input');
+          if (inp) {
+            inp.focus();
+            inp.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
         return;
       }
 
@@ -3759,8 +3865,32 @@ Be warm, professional, highly knowledgeable, and concise!`;
     window.addEventListener('DOMContentLoaded', () => {
       loadSettingsToInputs();
       checkAuthGate();
-      renderChatMessages();
       updateChatKeyBadge();
+      renderChatMessages();
+
+      // Auto-save listeners on Settings Gemini Key field
+      const setGeminiInp = document.getElementById('set-gemini-key');
+      if (setGeminiInp) {
+        setGeminiInp.addEventListener('input', () => saveGeminiApiKey(setGeminiInp.value, false));
+        setGeminiInp.addEventListener('change', () => saveGeminiApiKey(setGeminiInp.value, true));
+      }
+
+      // Scout Quick Key listeners
+      const scoutKeyInp = document.getElementById('scout-api-key-input');
+      const saveScoutKeyBtn = document.getElementById('btn-save-scout-key');
+      if (scoutKeyInp) {
+        scoutKeyInp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            saveGeminiApiKey(scoutKeyInp.value, true);
+          }
+        });
+      }
+      if (saveScoutKeyBtn && scoutKeyInp) {
+        saveScoutKeyBtn.addEventListener('click', () => {
+          saveGeminiApiKey(scoutKeyInp.value, true);
+        });
+      }
       const webhookInp = document.getElementById('set-gdrive-webhook');
       if (webhookInp && state.settings.gdriveWebhook) {
         webhookInp.value = state.settings.gdriveWebhook;
