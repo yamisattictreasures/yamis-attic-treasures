@@ -122,11 +122,6 @@
 
       <!-- Quick Actions & Tabs -->
       <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-        <!-- Google Drive Quick Link -->
-        <a id="header-gdrive-badge" href="https://docs.google.com/spreadsheets/d/1-mI7b9aE30oDxsCeZ1jAvrMcYQgub44vQB6vWOgGcqE/edit" target="_blank" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#1e2a20] text-[#e8f0e6] border border-[#587654]/70 hover:bg-[#28382b] transition shadow-sm" title="Open Live Google Drive Inventory Log">
-          <span class="text-[#c59b27]">📁</span>
-          <span>Drive Sheet ➔</span>
-        </a>
 
         <!-- Navigation Tabs -->
         <nav class="flex items-center bg-[#172118] p-1 rounded-xl border border-[#587654]/60 text-xs sm:text-sm shadow-inner">
@@ -295,17 +290,23 @@
           </div>
         </div>
 
-        <!-- Primary Action Buttons: See Details OR Snap Next -->
+        <!-- Primary Action Buttons: Mark Bought (Auto-Sync), See Details, Snap Next -->
         <div class="flex flex-wrap items-center gap-3 pt-2">
+          <!-- Button to Mark as Bought & Auto-Sync to Google Drive -->
+          <button id="btn-quick-bought" class="flex-1 sm:flex-none px-6 py-3.5 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+            <span id="bought-btn-icon">✅</span>
+            <span id="bought-btn-label">Mark as Bought</span>
+          </button>
+
           <!-- Button to See Details (Goes to Listing Studio) -->
-          <button id="btn-see-details" class="flex-1 sm:flex-none px-6 py-3.5 bg-gradient-to-r from-[#c59b27] via-[#e2be58] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+          <button id="btn-see-details" class="flex-1 sm:flex-none px-5 py-3.5 bg-gradient-to-r from-[#c59b27] via-[#e2be58] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
             <span>See Full Details</span>
             <span>➔</span>
           </button>
 
           <!-- Button to Snap Next Item (Clears intake) -->
-          <button id="btn-snap-next" class="flex-1 sm:flex-none px-5 py-3.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] font-bold text-sm sm:text-base rounded-xl shadow-md active:scale-95 transition flex items-center justify-center gap-2">
-            <span>📸 Snap Next Item</span>
+          <button id="btn-snap-next" class="flex-1 sm:flex-none px-4 py-3.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] font-bold text-sm sm:text-base rounded-xl shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+            <span>📸 Snap Next</span>
           </button>
 
           <!-- Live Comps Links on Quick Card -->
@@ -552,19 +553,40 @@
       <div class="p-5 sm:p-6 rounded-2xl bg-[#fdfbf7] border-2 border-[#b5ccb1] shadow-xl space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#d3e2d0] pb-3">
           <div>
-            <h3 class="font-brand font-bold text-lg text-[#2c2016]">Daily Sourcing Queue</h3>
-            <p class="text-xs text-[#587654]">Track items evaluated in the field today before bulk exporting or syncing.</p>
+            <div class="flex items-center gap-2">
+              <h3 class="font-brand font-bold text-lg text-[#2c2016]">Sourcing Session History</h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#e8f0e6] text-[#2c3d2a] border border-[#b5ccb1]">
+                Auto-Saved
+              </span>
+            </div>
+            <p class="text-xs text-[#587654]">Every item evaluated is automatically saved below. Mark items you purchase to auto-sync to Google Drive.</p>
           </div>
-          <div class="flex items-center gap-2">
-            <button id="btn-export-csv" class="px-3.5 py-1.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <a href="https://docs.google.com/spreadsheets/d/1-mI7b9aE30oDxsCeZ1jAvrMcYQgub44vQB6vWOgGcqE/edit" target="_blank" class="px-3.5 py-1.5 bg-[#1e2a20] hover:bg-[#28382b] text-[#e8f0e6] border border-[#587654] rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+              <span class="text-[#c59b27]">📁</span> Open Drive Inventory Sheet ➔
+            </a>
+            <button id="btn-export-csv" class="px-3 py-1.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] rounded-xl text-xs font-bold transition flex items-center gap-1">
               <span>📥</span> Export CSV
             </button>
-            <button id="btn-sync-queue-gdrive" class="px-3.5 py-1.5 bg-[#30472e] hover:bg-[#3d593a] text-[#f5f8f4] rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-              <span>☁️</span> Sync All to Google Drive
+            <button id="btn-clear-queue" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl text-xs font-bold transition">
+              Clear History
             </button>
-            <button id="btn-clear-queue" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl text-xs font-bold transition">
-              Clear Queue
-            </button>
+          </div>
+        </div>
+
+        <!-- Session Overview Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono pt-1">
+          <div class="p-3 bg-[#f8faf7] border border-[#d3e2d0] rounded-xl flex items-center justify-between">
+            <span class="text-xs font-sans text-[#587654]">Total Scanned:</span>
+            <strong id="queue-stat-scanned" class="text-base text-[#2c2016]">0 items</strong>
+          </div>
+          <div class="p-3 bg-[#eaf3e8] border border-[#b5ccb1] rounded-xl flex items-center justify-between">
+            <span class="text-xs font-sans text-[#2c3d2a]">Marked as Bought:</span>
+            <strong id="queue-stat-bought" class="text-base text-[#244220]">0 items</strong>
+          </div>
+          <div class="p-3 bg-[#fdfbf7] border border-[#c59b27] rounded-xl flex items-center justify-between">
+            <span class="text-xs font-sans text-[#7d5738]">Sourced Profit:</span>
+            <strong id="queue-stat-profit" class="text-base text-emerald-800 font-bold">$0.00</strong>
           </div>
         </div>
 
@@ -1272,11 +1294,56 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       document.getElementById('btn-quick-terapeak').href = `https://www.ebay.com/sh/research?marketplace=EBAY-US&keywords=${q}&dayRange=365&endDate=${Date.now()}&startDate=${Date.now() - 31536000000}`;
       document.getElementById('btn-quick-sold').href = `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`;
 
+      // Reset Bought Button State
+      const boughtLabel = document.getElementById('bought-btn-label');
+      const boughtBtn = document.getElementById('btn-quick-bought');
+      if (buy > 0) {
+        boughtLabel.textContent = `Bought ($${buy.toFixed(2)}) • Synced ☁️`;
+        boughtBtn.className = "flex-1 sm:flex-none px-6 py-3.5 bg-emerald-900 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg border-2 border-emerald-400 active:scale-95 transition flex items-center justify-center gap-2";
+      } else {
+        boughtLabel.textContent = "Mark as Bought";
+        boughtBtn.className = "flex-1 sm:flex-none px-6 py-3.5 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2";
+      }
+
+      // AUTOMATIC QUEUE LOGGING: Automatically log this scan to Session History
+      const scanItem = {
+        id: Date.now(),
+        name: data.itemName || 'Vintage Sourced Item',
+        maker: data.maker || '—',
+        comp: comp,
+        buy: buy,
+        shipTier: document.getElementById('input-ship-tier').value,
+        profit: estProfit,
+        target3x: target3x,
+        verdict: verdictPill.textContent.trim(),
+        bought: buy > 0,
+        dateAdded: new Date().toISOString().slice(0, 10),
+        data: { ...state.current }
+      };
+
+      // Prevent duplicate scan within 2 minutes of same item
+      const duplicateIdx = state.queue.findIndex(i => i.name === scanItem.name && (Date.now() - i.id < 120000));
+      if (duplicateIdx !== -1) {
+        state.queue[duplicateIdx] = scanItem;
+      } else {
+        state.queue.unshift(scanItem);
+      }
+
+      try {
+        localStorage.setItem('yami_queue', JSON.stringify(state.queue));
+      } catch (e) {}
+
+      renderQueue();
+
+      // If already has purchase price, auto-sync to Google Drive immediately
+      if (buy > 0 && state.settings.gdriveWebhook) {
+        sendToGoogleDrive([getCurrentItemPayload()], `"${scanItem.name}" auto-synced to Google Drive! ☁️`);
+      }
+
       card.classList.remove('hidden');
       card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-
-    // Actions on Quick Result Card
+// Actions on Quick Result Card
     document.getElementById('btn-see-details').addEventListener('click', () => {
       switchTab('studio');
     });
@@ -1290,7 +1357,42 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ==========================================
+    // MARK AS BOUGHT BUTTON & AUTO-SYNC TO GOOGLE DRIVE
+    document.getElementById('btn-quick-bought').addEventListener('click', () => {
+      let currentBuy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
+      const target3x = parseFloat(document.getElementById('limit-3x-display').textContent.replace(/[^0-9.-]/g, '')) || 0;
+      
+      const defaultPrice = currentBuy > 0 ? currentBuy.toFixed(2) : (target3x > 0 ? target3x.toFixed(2) : "10.00");
+      const userPriceInput = prompt("Enter purchase price paid for this item ($):", defaultPrice);
+      if (userPriceInput === null) return;
+
+      const enteredPrice = parseFloat(userPriceInput) || 0;
+      document.getElementById('input-buy-cost').value = enteredPrice.toFixed(2);
+      calculateFinancials();
+      updateStudio();
+
+      // Update current item in queue
+      if (state.queue.length > 0) {
+        state.queue[0].buy = enteredPrice;
+        state.queue[0].bought = true;
+        state.queue[0].profit = parseFloat(document.getElementById('calc-est-profit').textContent.replace(/[^0-9.-]/g, '')) || 0;
+        try {
+          localStorage.setItem('yami_queue', JSON.stringify(state.queue));
+        } catch (e) {}
+        renderQueue();
+      }
+
+      // Update Button UI
+      document.getElementById('bought-btn-label').textContent = `Purchased ($${enteredPrice.toFixed(2)}) • Synced ☁️`;
+      const boughtBtn = document.getElementById('btn-quick-bought');
+      boughtBtn.className = "flex-1 sm:flex-none px-6 py-3.5 bg-emerald-900 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg border-2 border-emerald-400 active:scale-95 transition flex items-center justify-center gap-2";
+
+      // AUTO-SYNC TO GOOGLE DRIVE IN BACKGROUND
+      const payload = getCurrentItemPayload();
+      sendToGoogleDrive([payload], `"${payload.name}" saved as Bought & auto-synced to Drive! ☁️`);
+      showToast(`Bought for $${enteredPrice.toFixed(2)} & auto-synced to Google Drive! ☁️`, "✅");
+    });
+// ==========================================
     // FINANCIAL CALCULATIONS & STUDIO UPDATES
     // ==========================================
     function calculateFinancials() {
@@ -1449,7 +1551,24 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       const emptyMsg = document.getElementById('queue-empty-msg');
       const badge = document.getElementById('queue-count');
 
+      const statScanned = document.getElementById('queue-stat-scanned');
+      const statBought = document.getElementById('queue-stat-bought');
+      const statProfit = document.getElementById('queue-stat-profit');
+
       badge.textContent = state.queue.length;
+
+      // Calculate stats
+      const totalScanned = state.queue.length;
+      const boughtItems = state.queue.filter(i => i.bought);
+      const totalBought = boughtItems.length;
+      const totalProfit = boughtItems.reduce((acc, i) => acc + (i.profit || 0), 0);
+
+      if (statScanned) statScanned.textContent = `${totalScanned} item${totalScanned !== 1 ? 's' : ''}`;
+      if (statBought) statBought.textContent = `${totalBought} item${totalBought !== 1 ? 's' : ''}`;
+      if (statProfit) {
+        statProfit.textContent = `${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}`;
+        statProfit.className = totalProfit >= 0 ? "text-base text-emerald-800 font-black" : "text-base text-rose-800 font-black";
+      }
 
       if (state.queue.length === 0) {
         tbody.innerHTML = '';
@@ -1459,20 +1578,83 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
 
       emptyMsg.classList.add('hidden');
       tbody.innerHTML = state.queue.map((item, idx) => `
-        <tr class="hover:bg-[#f4f8f3] text-[#2c2016]">
-          <td class="py-2.5 px-3 font-semibold text-[#1c140c]">${item.name}</td>
-          <td class="py-2.5 px-3 text-[#587654]">${item.maker || '—'}</td>
-          <td class="py-2.5 px-3 text-[#b8860b] font-bold">$${item.comp.toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-[#587654]">$${item.buy.toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-[#244220] font-bold">+$${item.profit.toFixed(2)}</td>
+        <tr class="hover:bg-[#f4f8f3] text-[#2c2016] transition">
+          <td class="py-2.5 px-3">
+            <strong class="block font-semibold text-[#1c140c]">${item.name}</strong>
+            <span class="text-[11px] text-[#587654]">${item.maker || 'Unmarked'}</span>
+          </td>
+          <td class="py-2.5 px-3 text-[#587654]">${item.verdict || 'Scouted'}</td>
+          <td class="py-2.5 px-3 text-[#b8860b] font-bold font-mono">$${item.comp.toFixed(2)}</td>
+          <td class="py-2.5 px-3 font-mono">
+            ${item.bought ? `<span class="text-[#244220] font-black">$${item.buy.toFixed(2)}</span>` : `<span class="text-[#778c74]">—</span>`}
+          </td>
+          <td class="py-2.5 px-3 font-bold font-mono ${item.profit >= 0 ? 'text-[#244220]' : 'text-rose-800'}">
+            ${item.profit >= 0 ? '+' : ''}$${item.profit.toFixed(2)}
+          </td>
           <td class="py-2.5 px-3 text-[#1c140c] font-mono">$${item.target3x.toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-right">
-            <button onclick="loadQueueItem(${idx})" class="px-2 py-1 bg-[#edf4eb] hover:bg-[#e0ece0] border border-[#8fad8c] text-xs font-semibold rounded text-[#2c3d2a] mr-1">Load</button>
-            <button onclick="deleteQueueItem(${idx})" class="px-2 py-1 bg-rose-100 hover:bg-rose-200 text-xs rounded text-rose-800 font-bold">✕</button>
+          <td class="py-2.5 px-3 text-right whitespace-nowrap">
+            ${item.bought 
+              ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-900 border border-emerald-400 rounded-lg text-[11px] font-bold mr-1">✅ Bought ☁️</span>`
+              : `<button onclick="markQueueItemBought(${idx})" class="px-2.5 py-1 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] text-[11px] font-bold rounded-lg shadow mr-1 transition">Buy ($)</button>`
+            }
+            <button onclick="loadQueueItem(${idx})" class="px-2 py-1 bg-[#edf4eb] hover:bg-[#e0ece0] border border-[#8fad8c] text-[11px] font-semibold rounded text-[#2c3d2a] mr-1">Load</button>
+            <button onclick="deleteQueueItem(${idx})" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-[11px] rounded text-rose-800 font-bold">✕</button>
           </td>
         </tr>
       `).join('');
     }
+
+    window.markQueueItemBought = function(idx) {
+      const item = state.queue[idx];
+      if (!item) return;
+
+      const defaultPrice = item.buy > 0 ? item.buy.toFixed(2) : (item.target3x > 0 ? item.target3x.toFixed(2) : "10.00");
+      const userPrice = prompt(`Enter purchase price paid for "${item.name}" ($):`, defaultPrice);
+      if (userPrice === null) return;
+
+      const price = parseFloat(userPrice) || 0;
+      item.buy = price;
+      item.bought = true;
+
+      // Recalculate profit
+      const gross = item.comp + (item.shipTier === 'fragile' ? 15.00 : 8.00);
+      const fee = (gross * 0.1325) + 0.40;
+      const shipCost = item.shipTier === 'fragile' ? 17.50 : 9.00;
+      item.profit = gross - fee - shipCost - price;
+
+      try {
+        localStorage.setItem('yami_queue', JSON.stringify(state.queue));
+      } catch (e) {}
+
+      renderQueue();
+
+      // Auto-sync item to Google Drive
+      const payload = {
+        dateAdded: new Date().toISOString().slice(0, 10),
+        name: item.name,
+        maker: item.maker,
+        confidence: "Verified",
+        comp: item.comp,
+        buy: price,
+        gross: gross,
+        ebayFee: fee,
+        netPayout: gross - fee - shipCost,
+        profit: item.profit,
+        roi: `${price > 0 ? Math.round((item.profit/price)*100) : 0}%`,
+        target3x: item.target3x,
+        target2x: item.target3x * 1.5,
+        verdict: item.verdict,
+        seoTitle: item.name,
+        category: "Pottery & Glass",
+        era: "Vintage",
+        material: "Ceramic / Glass",
+        dimensions: "",
+        condition: "Good vintage condition"
+      };
+
+      sendToGoogleDrive([payload], `"${item.name}" marked as Bought & auto-synced to Google Drive! ☁️`);
+      showToast(`Saved as Bought ($${price.toFixed(2)}) & auto-synced to Drive! ☁️`, "✅");
+    };
 
     window.loadQueueItem = function(idx) {
       const item = state.queue[idx];
@@ -1496,40 +1678,8 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
         localStorage.setItem('yami_queue', JSON.stringify(state.queue));
       } catch (e) {}
       renderQueue();
-      showToast("Item deleted from queue");
+      showToast("Item deleted from session history");
     };
-
-    document.getElementById('btn-save-to-queue').addEventListener('click', () => {
-      const name = document.getElementById('input-item-name').value || "Untitled Vintage Item";
-      const maker = document.getElementById('input-maker').value || "";
-      const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
-      const buy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
-      const shipTier = document.getElementById('input-ship-tier').value;
-      const profit = parseFloat(document.getElementById('calc-est-profit').textContent.replace(/[^0-9.-]/g, '')) || 0;
-      const target3x = parseFloat(document.getElementById('limit-3x-display').textContent.replace(/[^0-9.-]/g, '')) || 0;
-
-      state.queue.unshift({
-        id: Date.now(),
-        name,
-        maker,
-        comp,
-        buy,
-        shipTier,
-        profit,
-        target3x
-      });
-
-      try {
-        localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-      } catch (e) {}
-
-      renderQueue();
-      showToast("Saved to queue! 📦");
-
-      if (state.settings.gdriveAutosync && state.settings.gdriveWebhook) {
-        sendToGoogleDrive([getCurrentItemPayload()], "Auto-synced to Google Drive! ☁️");
-      }
-    });
 
     document.getElementById('btn-clear-queue').addEventListener('click', () => {
       if (state.queue.length === 0) return;
@@ -1538,7 +1688,7 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
         localStorage.setItem('yami_queue', JSON.stringify(state.queue));
       } catch (e) {}
       renderQueue();
-      showToast("Queue cleared!");
+      showToast("History cleared!");
     });
 
     document.getElementById('btn-export-csv').addEventListener('click', () => {
@@ -1547,108 +1697,21 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
         return;
       }
 
-      let csv = "ID,Item Name,Maker,Comp Price,Buy Cost,Estimated Profit,3x Target Buy Limit\n";
+      let csv = "ID,Item Name,Maker,Comp Price,Buy Cost,Estimated Profit,3x Target Buy Limit,Status\n";
       state.queue.forEach(i => {
-        csv += `"${i.id}","${i.name.replace(/"/g, '""')}","${(i.maker||'').replace(/"/g, '""')}",${i.comp},${i.buy},${i.profit},${i.target3x}\n`;
+        csv += `"${i.id}","${i.name.replace(/"/g, '""')}","${(i.maker||'').replace(/"/g, '""')}",${i.comp},${i.buy},${i.profit},${i.target3x},"${i.bought ? 'BOUGHT' : 'SCANNED'}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `yamis_inventory_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `yamis_sourcing_session_${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast("Exported queue to CSV! 📥");
+      showToast("Exported session history to CSV! 📥");
     });
-
-    // Google Drive Sync
-    function getCurrentItemPayload() {
-      const name = document.getElementById('input-item-name').value || "Untitled Vintage Item";
-      const maker = document.getElementById('input-maker').value || "";
-      const conf = document.getElementById('input-confidence').value || "Unknown";
-      const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
-      const buy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
-      const gross = parseFloat(document.getElementById('calc-gross').textContent.replace(/[^0-9.-]/g, '')) || 0;
-      const fee = parseFloat(document.getElementById('calc-ebay-fee').textContent.replace(/[^0-9.-]/g, '')) || 0;
-      const netPayout = parseFloat(document.getElementById('calc-net-payout').textContent.replace(/[^0-9.-]/g, '')) || 0;
-      const profit = parseFloat(document.getElementById('calc-est-profit').textContent.replace(/[^0-9.-]/g, '')) || 0;
-      const roi = (buy > 0) ? Math.round((profit / buy) * 100) : 0;
-      const target3x = parseFloat(document.getElementById('limit-3x-display').textContent.replace(/[^0-9.-]/g, '')) || 0;
-      const target2x = parseFloat(document.getElementById('limit-2x-display').textContent.replace(/[^0-9.-]/g, '')) || 0;
-      const seoTitle = document.getElementById('studio-title-input').value || "";
-      const category = document.getElementById('spec-category').value || "";
-      const era = document.getElementById('spec-era').value || "";
-      const material = document.getElementById('spec-material').value || "";
-      const dimensions = document.getElementById('spec-dimensions').value || "";
-      const condition = document.getElementById('studio-condition-desc').value || "";
-
-      return {
-        dateAdded: new Date().toISOString().slice(0, 10),
-        name,
-        maker,
-        confidence: conf,
-        comp,
-        buy,
-        gross,
-        ebayFee: Math.abs(fee),
-        netPayout,
-        profit,
-        roi: `${roi}%`,
-        target3x,
-        target2x,
-        verdict: buy <= target3x && buy > 0 ? "GOOD BUY (3x)" : (profit > 0 ? "CONDITIONAL" : "PASS"),
-        seoTitle,
-        category,
-        era,
-        material,
-        dimensions,
-        condition
-      };
-    }
-
-    function sendToGoogleDrive(items, successMsg) {
-      const webhook = state.settings.gdriveWebhook;
-      if (!webhook || !webhook.trim().startsWith('http')) {
-        showToast("Enter Google Apps Script URL in Settings!", "ℹ️");
-        switchTab('settings');
-        return;
-      }
-
-      showToast("Sending to Google Drive Sheet... ⏳", "☁️");
-
-      fetch(webhook.trim(), {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(items)
-      }).then(() => {
-        showToast(successMsg || "Saved to Google Drive inventory! ☁️", "✅");
-      }).catch(err => {
-        console.error("Google Drive sync error:", err);
-        showToast("Synced to Google Drive! (Check Sheet)", "✅");
-      });
-    }
-
-    document.getElementById('btn-sync-gdrive').addEventListener('click', () => {
-      const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
-      if (comp === 0) {
-        showToast("Enter comp price before syncing to Drive!", "⚠️");
-        return;
-      }
-      const payload = getCurrentItemPayload();
-      sendToGoogleDrive([payload], `"${payload.name}" synced to Drive!`);
-    });
-
-    document.getElementById('btn-sync-queue-gdrive').addEventListener('click', () => {
-      if (state.queue.length === 0) {
-        showToast("Queue is empty, nothing to sync!", "⚠️");
-        return;
-      }
-      sendToGoogleDrive(state.queue, `Synced ${state.queue.length} items to Drive!`);
-    });
-
-    // ==========================================
+// ==========================================
     // SETTINGS PANEL & GEMINI KEY PERSISTENCE
     // ==========================================
     const keyInput = document.getElementById('set-gemini-key');
