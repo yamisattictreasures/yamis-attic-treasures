@@ -1063,60 +1063,42 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       let lastErr = null;
       let parsed = null;
 
+      // Direct multimodal vision call without billable tools (100% Free Tier compatible)
       for (const model of candidateModels) {
         try {
-          statusText.textContent = `Analyzing marks & comps with ${model}...`;
+          statusText.textContent = `Analyzing marks & pattern with ${model}...`;
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
 
-          // Try first with Google Search Grounding for live comp lookup
-          let resp = null;
-          try {
-            resp = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{
-                  parts: [
-                    { text: prompt },
-                    ...imageParts
-                  ]
-                }],
-                tools: [{ googleSearch: {} }],
-                generationConfig: {
-                  temperature: 0.2
-                }
-              })
-            });
-          } catch (netErr) {}
-
-          // Fallback to standard JSON schema generateContent if tools unsupported
-          if (!resp || !resp.ok) {
-            resp = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{
-                  parts: [
-                    { text: prompt },
-                    ...imageParts
-                  ]
-                }],
-                generationConfig: {
-                  temperature: 0.2,
-                  responseMimeType: "application/json"
-                }
-              })
-            });
-          }
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: prompt },
+                  ...imageParts
+                ]
+              }],
+              generationConfig: {
+                temperature: 0.2,
+                responseMimeType: "application/json"
+              }
+            })
+          });
 
           if (!resp.ok) {
             const errBody = await resp.json().catch(() => ({}));
             const errMsg = errBody?.error?.message || `HTTP ${resp.status}`;
-            // If model 404 or unsupported on this tier, continue loop
+            console.warn(`Model ${model} returned error: ${errMsg}`);
+            lastErr = new Error(errMsg);
+
+            // If 404 or not found, try next candidate
             if (resp.status === 404 || errMsg.toLowerCase().includes('not found') || errMsg.toLowerCase().includes('not supported')) {
-              console.warn(`Model ${model} not available (${errMsg}), trying next candidate...`);
-              lastErr = new Error(errMsg);
               continue;
+            }
+            // If quota error, stop cycling and explain clearly
+            if (resp.status === 429 || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted')) {
+              throw new Error("Google AI Studio quota limit reached. Please wait 60 seconds or generate a fresh free key in Google AI Studio.");
             }
             throw new Error(errMsg);
           }
@@ -1125,7 +1107,6 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
           const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (!text) throw new Error("Empty response from AI model");
 
-          // Clean markdown code blocks if returned
           let cleanJson = text.trim();
           const jsonMatch = cleanJson.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
           if (jsonMatch) cleanJson = jsonMatch[1].trim();
@@ -1135,8 +1116,7 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
           break;
         } catch (e) {
           lastErr = e;
-          if (!e.message.toLowerCase().includes('not found') && !e.message.toLowerCase().includes('not supported')) {
-            // If it's a quota or auth error, don't keep cycling 404s
+          if (e.message.includes("quota")) {
             break;
           }
         }
