@@ -1133,25 +1133,44 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       // Direct multimodal vision call without billable tools (100% Free Tier compatible)
       for (const model of candidateModels) {
         try {
-          statusText.textContent = `Analyzing marks & pattern with ${model}...`;
+          statusText.textContent = `Analyzing marks & live searching comps with ${model}...`;
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
 
-          const resp = await fetch(url, {
+          // Smart request: Attempt with Google Search Grounding for automated live comp & maker matching
+          let reqPayload = {
+            contents: [{
+              parts: [
+                { text: prompt },
+                ...imageParts
+              ]
+            }],
+            tools: [{ googleSearch: {} }],
+            generationConfig: {
+              temperature: 0.2,
+              responseMimeType: "application/json"
+            }
+          };
+
+          let resp = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  { text: prompt },
-                  ...imageParts
-                ]
-              }],
-              generationConfig: {
-                temperature: 0.2,
-                responseMimeType: "application/json"
-              }
-            })
+            body: JSON.stringify(reqPayload)
           });
+
+          // Self-healing fallback: If Google Search Grounding is not active on this key (e.g. billing unlinked 429), fall back to pure vision
+          if (!resp.ok) {
+            const errClone = await resp.clone().json().catch(() => ({}));
+            const errMsg = errClone?.error?.message || '';
+            if (resp.status === 429 || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('tool') || errMsg.toLowerCase().includes('search')) {
+              console.log(`Search grounding requires Pay-as-you-go billing; running direct vision on ${model}...`);
+              delete reqPayload.tools;
+              resp = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(reqPayload)
+              });
+            }
+          }
 
           if (!resp.ok) {
             const errBody = await resp.json().catch(() => ({}));
