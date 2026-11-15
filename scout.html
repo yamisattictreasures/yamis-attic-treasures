@@ -686,13 +686,19 @@
           <p class="text-xs text-[#587654]">
             Manage your key in <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline text-[#b8860b] font-semibold">Google AI Studio</a>. Linked Google Cloud billing enables live Google Search Grounding for real-time maker and sold comp verification.
           </p>
-          <div class="flex gap-2">
-            <input type="password" id="set-gemini-key" class="flex-1 bg-[#fdfbf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-mono text-[#2c2016] focus:outline-none focus:border-[#587654]" placeholder="Paste AIzaSy... key here">
+          <div class="flex flex-wrap gap-2">
+            <input type="password" id="set-gemini-key" class="flex-1 min-w-[180px] bg-[#fdfbf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-mono text-[#2c2016] focus:outline-none focus:border-[#587654]" placeholder="Paste AIzaSy... key here">
             <button id="btn-toggle-key-view" class="px-3 py-2 bg-[#edf4eb] border border-[#8fad8c] text-xs font-semibold rounded-xl text-[#2c3d2a]">
               Show
             </button>
             <button id="btn-save-key" class="px-4 py-2 bg-gradient-to-r from-[#b8860b] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-xs rounded-xl shadow transition">
               Save Key
+            </button>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <span class="text-[11px] text-[#587654]">Tip: Bookmark the URL after saving so your phone never asks again.</span>
+            <button type="button" id="btn-copy-magic-url" class="px-3 py-1.5 bg-[#edf4eb] hover:bg-[#e0ece0] border border-[#8fad8c] text-[#2c3d2a] text-[11px] font-bold rounded-lg transition">
+              📱 Copy Auto-Key Phone Bookmark URL
             </button>
           </div>
           <div class="space-y-1.5 pt-1">
@@ -791,7 +797,7 @@
       },
       queue: [],
       settings: {
-        geminiKey: localStorage.getItem('yamis_gemini_api_key') || '',
+        geminiKey: '',
         searchGrounding: true,
         highResVision: true,
         feeRate: 13.25,
@@ -804,13 +810,75 @@
         spreadsheetId: '1-mI7b9aE30oDxsCeZ1jAvrMcYQgub44vQB6vWOgGcqE'
       }
     };
-  
+
+    function getCookieKey() {
+      const match = document.cookie.match(/(?:^|;\s*)yamis_gemini_key=([^;]+)/);
+      return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function persistApiKeyEverywhere(keyVal) {
+      const clean = (keyVal || '').trim();
+      state.settings.geminiKey = clean;
+      try {
+        if (clean) {
+          localStorage.setItem('yamis_gemini_api_key', clean);
+        } else {
+          localStorage.removeItem('yamis_gemini_api_key');
+        }
+        const rawSettings = localStorage.getItem('yami_settings');
+        const parsedSettings = rawSettings ? JSON.parse(rawSettings) : {};
+        parsedSettings.geminiKey = clean;
+        localStorage.setItem('yami_settings', JSON.stringify(parsedSettings));
+      } catch (e) {}
+      try {
+        if (clean) {
+          document.cookie = `yamis_gemini_key=${encodeURIComponent(clean)}; max-age=315360000; path=/; SameSite=Lax`;
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', `${window.location.pathname}#key=${encodeURIComponent(clean)}`);
+          }
+        } else {
+          document.cookie = 'yamis_gemini_key=; max-age=0; path=/; SameSite=Lax';
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+        }
+      } catch (e) {}
+    }
+
+    function resolvePersistedApiKey() {
+      // 1. Check URL #key=... or ?key=... (survives Android home-screen shortcuts & cache clears)
+      let urlKey = '';
+      try {
+        const hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+        const searchParams = new URLSearchParams(window.location.search || '');
+        urlKey = (hashParams.get('key') || searchParams.get('key') || '').trim();
+      } catch (e) {}
+
+      let lsDirect = '';
+      let lsSettingsKey = '';
+      try {
+        lsDirect = (localStorage.getItem('yamis_gemini_api_key') || '').trim();
+        const savedSettings = localStorage.getItem('yami_settings');
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          lsSettingsKey = (parsed.geminiKey || '').trim();
+          state.settings = { ...state.settings, ...parsed };
+        }
+      } catch (e) {}
+
+      const cookieKey = getCookieKey().trim();
+      const resolved = urlKey || lsDirect || lsSettingsKey || cookieKey || '';
+      if (resolved) {
+        persistApiKeyEverywhere(resolved);
+      }
+      return resolved;
+    }
+
     try {
       const savedQueue = localStorage.getItem('yami_queue');
       if (savedQueue) state.queue = JSON.parse(savedQueue);
-      const savedSettings = localStorage.getItem('yami_settings');
-      if (savedSettings) state.settings = { ...state.settings, ...JSON.parse(savedSettings) };
     } catch (e) {}
+    resolvePersistedApiKey();
   
     // Tab Navigation
     function switchTab(tabId) {
@@ -2194,11 +2262,24 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
   
     document.getElementById('btn-save-key').addEventListener('click', () => {
       const val = keyInput.value.trim();
-      state.settings.geminiKey = val;
-      localStorage.setItem('yamis_gemini_api_key', val);
+      persistApiKeyEverywhere(val);
       updateKeyBadge();
-      showToast(val ? "Gemini API key saved! ✨" : "Key cleared");
+      showToast(val ? "Gemini API key locked in permanently! ✨" : "Key cleared");
     });
+
+    const copyMagicUrlBtn = document.getElementById('btn-copy-magic-url');
+    if (copyMagicUrlBtn) {
+      copyMagicUrlBtn.addEventListener('click', () => {
+        const val = (keyInput.value || state.settings.geminiKey || '').trim();
+        if (!val) {
+          showToast("Paste and save your API key first!", "⚠️");
+          return;
+        }
+        persistApiKeyEverywhere(val);
+        const magicUrl = `${window.location.origin}${window.location.pathname}#key=${encodeURIComponent(val)}`;
+        copyText(magicUrl, "Permanent Auto-Key Bookmark URL copied! Save to phone Home Screen 📱");
+      });
+    }
   
     document.getElementById('btn-toggle-key-view').addEventListener('click', () => {
       const btn = document.getElementById('btn-toggle-key-view');
@@ -2212,6 +2293,8 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
     });
   
     document.getElementById('btn-save-settings').addEventListener('click', () => {
+      const typedKey = (keyInput.value || state.settings.geminiKey || '').trim();
+      if (typedKey) persistApiKeyEverywhere(typedKey);
       state.settings.feeRate = parseFloat(document.getElementById('set-fee-rate').value) || 13.25;
       state.settings.stdShip = parseFloat(document.getElementById('set-std-ship').value) || 8.00;
       state.settings.gdriveWebhook = (document.getElementById('set-gdrive-webhook').value || '').trim();
@@ -2262,40 +2345,3 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
   </script>
 </body>
 </html>
-What Was Upgraded in scout.html (Universal High-Res Mark & Comp Engine)
-All artist-specific hardcoding has been removed and replaced with a universal visual-inspection and live-verification pipeline built for any antique, pottery, glass, metalware, or collectible mark:
-
-2048px High-Resolution Capture + MEDIA_RESOLUTION_HIGH Token Processing:
-
-Upgraded client-side image processing from 1024px @ 80% to 2048px @ 92% JPEG with high-quality smoothing so incised clay cursive, tiny silver hallmarks, and acid-etched glass marks stay sharp.
-
-Added "mediaResolution": "MEDIA_RESOLUTION_HIGH" inside generationConfig (with an automatic fallback if a model doesn't support it) so Gemini inspects the full high-density tiled image grid instead of downsampling.
-
-1-Tap 🔍 Crop Mark Macro Zoom Tool:
-
-Every photo thumbnail in your tray now includes a 🔍 button (plus a 🔍 Crop Mark button on the tray toolbar) that opens an interactive zoom/crop modal.
-
-Drag a tight box around any small signature, backstamp, or hallmark on your phone or desktop and tap Add Macro Crop to Tray—it upscales and attaches that zoomed close-up alongside your full-piece photo.
-
-Universal Glyph-Permutation & Zero-Result Pivot Protocol:
-
-Forces character-by-character mark transcription (recording mark method, location, and orientation, with ? for unclear strokes) and requires 3 to 5 alternate character permutations (M vs. Mc/Mac, W vs. A/IV/M, cl vs. d, 1 vs. 7, 0 vs. O, rn vs. m).
-
-Zero-Result Pivot: If live Google Search returns zero collector, auction, or eBay records for the initial OCR reading, the AI automatically discards that guess and tests its alternate character permutations and motif/form searches until it finds documented market comps—or declares "I do not know. I do not have enough information."
-
-Forensic Deep OCR Model Priority + Mode Selector:
-
-Prioritizes gemini-2.5-pro first by default for complex cursive and worn hallmarks, with a 1-tap dropdown next to Evaluate Find to switch between 🔬 Forensic Deep OCR (Pro First) and ⚡ Fast Field Scan (Flash First).
-
-Live Search Grounding & Mark Permutations Audit Trail:
-
-Inside Listing Studio, a new Forensic OCR & Live Search Grounding Audit panel displays the exact model used, every alternate mark permutation tested, the live Google Search queries executed, and clickable links to the grounded web sources used to calculate your sold comp average.
-
-How to Deploy to GitHub
-Download scout.html above.
-
-Go to your yamisattictreasures/yamis-attic-treasures repository on GitHub (main branch), click Add file 
-→
-→ Upload files, drag and drop scout.html to overwrite the existing file, and click Commit changes.
-
-Wait ~30 seconds for Cloudflare to build and deploy, then hard-refresh your live page.
