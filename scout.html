@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yami's Attic Treasures — Sourcing Scout v4.2 Pro</title>
+  <title>Yami's Attic Treasures — Sourcing Scout v4.3 Mobile Pro</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,52 +96,50 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col text-slate-900">
+<body class="min-h-screen flex flex-col text-slate-900 overflow-x-hidden">
   
   <!-- Top Hero Header: Official Approved Store Banner in Faded Sage Attic -->
   <header class="border-b-2 border-[#8fad8c] bg-[#eef4ed] shadow-md relative">
-    <div class="max-w-7xl mx-auto px-2 sm:px-4 pt-2 pb-1">
-      <div class="relative w-full overflow-hidden rounded-xl border-2 border-[#8fad8c]/50 shadow-md bg-[#1f2c20] py-5 px-6 text-center">
-        <p class="text-[11px] sm:text-xs font-mono tracking-[0.25em] uppercase text-[#b5ccb1] mb-1">Port St. Lucie, FL • Est. 2011</p>
-        <h2 class="font-brand font-black text-2xl sm:text-4xl tracking-wider uppercase gold-emboss">Yami's Attic Treasures</h2>
-        <p class="text-xs sm:text-sm text-[#e8f0e6] mt-1 font-medium">Antiques • Art Pottery • Fine Glass • Vintage Collectibles</p>
+    <div class="max-w-7xl mx-auto px-2.5 sm:px-4 pt-2 pb-1">
+      <div class="relative w-full overflow-hidden rounded-xl border-2 border-[#8fad8c]/50 shadow-md bg-[#1f2c20] py-3.5 sm:py-5 px-4 sm:px-6 text-center">
+        <p class="text-[10px] sm:text-xs font-mono tracking-[0.22em] uppercase text-[#b5ccb1] mb-0.5 sm:mb-1">Port St. Lucie, FL • Est. 2011</p>
+        <h2 class="font-brand font-black text-xl sm:text-4xl tracking-wider uppercase gold-emboss">Yami's Attic Treasures</h2>
+        <p class="text-[11px] sm:text-sm text-[#e8f0e6] mt-0.5 sm:mt-1 font-medium">Antiques • Art Pottery • Fine Glass • Vintage Collectibles</p>
       </div>
     </div>
   
-    <!-- Navigation & Status Bar -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2.5">
-        <h1 class="font-brand font-bold text-base sm:text-lg text-[#2c3d2a] tracking-wider uppercase">
+    <!-- Navigation & Status Bar (Mobile-Optimized Single-Row Tabs) -->
+    <div class="max-w-7xl mx-auto px-2.5 sm:px-6 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div class="flex items-center justify-between sm:justify-start gap-2">
+        <h1 class="font-brand font-bold text-xs sm:text-lg text-[#2c3d2a] tracking-wider uppercase">
           Sourcing Scout &amp; Command Center
         </h1>
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#222e23] text-[#d3e2d0] border border-[#587654] font-mono shadow-inner">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#8fad8c] animate-pulse"></span>v4.2 High-Res OCR
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#222e23] text-[#d3e2d0] border border-[#587654] font-mono shadow-inner">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#8fad8c] animate-pulse"></span>v4.3 Mobile
         </span>
       </div>
   
-      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-        <nav class="flex items-center bg-[#172118] p-1 rounded-xl border border-[#587654]/60 text-xs sm:text-sm shadow-inner">
-          <button id="tab-scout-btn" class="px-3 sm:px-4 py-1.5 rounded-lg font-bold transition bg-gradient-to-r from-[#c59b27] via-[#e2be58] to-[#c59b27] text-[#1c140c] shadow">
-            ⚡ Sourcing Scout
-          </button>
-          <button id="tab-studio-btn" class="px-3 sm:px-4 py-1.5 rounded-lg font-medium transition text-[#d3e2d0] hover:text-[#f5f8f4]">
-            📝 Listing Studio
-          </button>
-          <button id="tab-queue-btn" class="px-3 sm:px-4 py-1.5 rounded-lg font-medium transition text-[#d3e2d0] hover:text-[#f5f8f4]">
-            📦 Queue (<span id="queue-count">0</span>)
-          </button>
-          <button id="tab-settings-btn" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-medium transition text-[#d3e2d0] hover:text-[#f5f8f4]" title="Settings &amp; Gemini API Key">
-            ⚙️ Settings
-          </button>
-        </nav>
-      </div>
+      <nav class="grid grid-cols-4 sm:flex items-center bg-[#172118] p-1 rounded-xl border border-[#587654]/60 text-[11px] sm:text-sm shadow-inner gap-1">
+        <button id="tab-scout-btn" class="px-2 sm:px-4 py-1.5 rounded-lg font-bold transition bg-gradient-to-r from-[#c59b27] via-[#e2be58] to-[#c59b27] text-[#1c140c] shadow text-center truncate">
+          ⚡ Scout
+        </button>
+        <button id="tab-studio-btn" class="px-2 sm:px-4 py-1.5 rounded-lg font-medium transition text-[#d3e2d0] hover:text-[#f5f8f4] text-center truncate">
+          📝 Studio
+        </button>
+        <button id="tab-queue-btn" class="px-2 sm:px-4 py-1.5 rounded-lg font-medium transition text-[#d3e2d0] hover:text-[#f5f8f4] text-center truncate">
+          📦 Queue (<span id="queue-count">0</span>)
+        </button>
+        <button id="tab-settings-btn" class="px-2 sm:px-3 py-1.5 rounded-lg font-medium transition text-[#d3e2d0] hover:text-[#f5f8f4] text-center truncate" title="Settings &amp; Gemini API Key">
+          ⚙️ Setup
+        </button>
+      </nav>
     </div>
   </header>
   
   <!-- Notification Toast Container -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none bg-[#172217] border-2 border-[#8fad8c] text-[#f5f8f4] px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+  <div id="toast" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 sm:max-w-md z-50 transform transition-all duration-300 translate-y-24 opacity-0 pointer-events-none bg-[#172217] border-2 border-[#8fad8c] text-[#f5f8f4] px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
     <span id="toast-icon">✅</span>
-    <span id="toast-msg" class="text-sm font-semibold">Notification message</span>
+    <span id="toast-msg" class="text-xs sm:text-sm font-semibold">Notification message</span>
   </div>
 
   <!-- 1-Tap Macro Mark Crop Modal -->
@@ -176,44 +174,43 @@
   </div>
   
   <!-- Main Content Layout -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-5 sm:space-y-6">
   
     <!-- ========================================== -->
     <!-- TAB 1: SOURCING SCOUT (Streamlined Intake) -->
     <!-- ========================================== -->
-    <section id="tab-scout" class="space-y-6">
+    <section id="tab-scout" class="space-y-5">
   
-      <div class="p-5 sm:p-7 rounded-2xl bg-[#fdfbf7] border-2 border-[#b5ccb1] shadow-2xl space-y-5">
+      <div class="p-4 sm:p-7 rounded-2xl bg-[#fdfbf7] border-2 border-[#b5ccb1] shadow-2xl space-y-4 sm:space-y-5">
         
         <!-- Action Buttons: Snap & Upload -->
-        <div class="flex flex-wrap items-center gap-3">
-          <button id="btn-camera-snap" class="flex-1 sm:flex-none px-6 py-3.5 bg-gradient-to-r from-[#b8860b] via-[#c59b27] to-[#e2be58] hover:from-[#a07409] hover:to-[#c59b27] text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2.5">
-            <span class="text-xl">📸</span>
-            <span>Snap a Photo</span>
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 sm:gap-3">
+          <button id="btn-camera-snap" class="px-4 sm:px-6 py-3.5 bg-gradient-to-r from-[#b8860b] via-[#c59b27] to-[#e2be58] hover:from-[#a07409] hover:to-[#c59b27] text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+            <span class="text-lg sm:text-xl">📸</span>
+            <span>Snap Photo</span>
           </button>
   
-          <button id="btn-photo-upload" class="flex-1 sm:flex-none px-5 py-3.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border-2 border-[#8fad8c] font-bold text-sm sm:text-base rounded-xl shadow-md active:scale-95 transition flex items-center justify-center gap-2">
-            <span class="text-lg">🖼️</span>
-            <span>Upload Photos</span>
+          <button id="btn-photo-upload" class="px-4 sm:px-5 py-3.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border-2 border-[#8fad8c] font-bold text-sm sm:text-base rounded-xl shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+            <span class="text-base sm:text-lg">🖼️</span>
+            <span>Upload</span>
           </button>
   
           <input type="file" id="camera-snap-input" accept="image/*" capture="environment" class="hidden">
           <input type="file" id="photo-upload-input" accept="image/*" multiple class="hidden">
   
-          <button id="btn-clear-intake" class="hidden sm:flex px-3.5 py-3 text-xs text-[#587654] hover:text-[#2c3d2a] font-semibold rounded-xl border border-[#d3e2d0] hover:bg-[#edf4eb] transition items-center gap-1 ml-auto">
-            <span>✨</span> Clear
+          <button id="btn-clear-intake" class="col-span-2 sm:col-span-1 px-3.5 py-2.5 sm:py-3 text-xs text-[#587654] hover:text-[#2c3d2a] font-semibold rounded-xl border border-[#d3e2d0] hover:bg-[#edf4eb] transition flex items-center justify-center gap-1 sm:ml-auto">
+            <span>✨</span> Clear Intake
           </button>
         </div>
   
         <!-- Photo Thumbnail Preview Strip -->
         <div id="photo-tray-container" class="rounded-xl border-2 border-dashed border-[#8fad8c]/70 bg-[#f4f8f3] p-3 transition">
-          <div id="photo-empty-state" class="text-center py-4 text-xs sm:text-sm text-[#465e43]">
+          <div id="photo-empty-state" class="text-center py-3 sm:py-4 text-xs sm:text-sm text-[#465e43]">
             <p class="font-medium">Point your camera at maker marks, signatures, and full piece.</p>
             <p class="text-[11px] text-[#72926d] mt-0.5">2048px High-Res Capture + High-Token OCR • Tap 🔍 on any photo to crop a small mark.</p>
           </div>
   
           <div id="photo-tray" class="hidden flex flex-wrap items-center gap-3">
-            <!-- Dynamic thumbnails injected here -->
           </div>
   
           <div id="photo-count-bar" class="hidden mt-2 pt-2 border-t border-[#d3e2d0] flex flex-wrap items-center justify-between gap-2 text-xs text-[#587654]">
@@ -223,10 +220,10 @@
                 🔍 Crop Mark
               </button>
               <button type="button" onclick="openGoogleLens()" class="px-2.5 py-1 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-md text-[11px] font-semibold flex items-center gap-1 transition shadow-sm">
-                🌐 Visual Match (Lens)
+                🌐 Lens
               </button>
               <button type="button" id="btn-clear-photos" class="text-[11px] text-rose-700 hover:text-rose-900 font-semibold underline">
-                Remove all
+                Remove
               </button>
             </div>
           </div>
@@ -241,18 +238,18 @@
         </div>
   
         <!-- Evaluate / Scan Mode Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-          <div class="flex flex-wrap items-center gap-3 text-[11px] text-[#587654]">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+          <div class="flex flex-wrap items-center justify-between sm:justify-start gap-2 text-[11px] text-[#587654]">
             <span id="gemini-key-status" class="inline-flex items-center gap-1 font-medium">
               <span class="w-2 h-2 rounded-full bg-[#587654]"></span> Gemini AI Vision Ready
             </span>
-            <select id="scan-precision-mode" class="bg-[#edf4eb] border border-[#8fad8c] text-[#2c3d2a] font-bold rounded-lg px-2.5 py-1 text-[11px] focus:outline-none">
+            <select id="scan-precision-mode" class="bg-[#edf4eb] border border-[#8fad8c] text-[#2c3d2a] font-bold rounded-lg px-2 py-1 text-[11px] focus:outline-none">
               <option value="forensic">🔬 Forensic Deep OCR (Pro First)</option>
               <option value="fast">⚡ Fast Field Scan (Flash First)</option>
             </select>
           </div>
   
-          <button id="btn-evaluate" class="px-7 py-3 bg-gradient-to-r from-[#b8860b] via-[#c59b27] to-[#e2be58] hover:from-[#a07409] hover:to-[#c59b27] text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-xl transition flex items-center gap-2">
+          <button id="btn-evaluate" class="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-[#b8860b] via-[#c59b27] to-[#e2be58] hover:from-[#a07409] hover:to-[#c59b27] text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-xl transition flex items-center justify-center gap-2">
             <span id="eval-btn-icon">⚡</span>
             <span id="eval-btn-label">Evaluate Find</span>
           </button>
@@ -260,7 +257,7 @@
   
         <!-- Researching Status Bar -->
         <div id="eval-status-box" class="hidden p-3.5 rounded-xl bg-[#edf4eb] border border-[#8fad8c]/60 flex items-center gap-3">
-          <svg class="animate-spin h-5 w-5 text-[#587654]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg class="animate-spin h-5 w-5 text-[#587654] shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -273,36 +270,36 @@
       <!-- ========================================== -->
       <!-- RESULT CARD: QUICK & EASY ANSWER           -->
       <!-- ========================================== -->
-      <div id="quick-result-card" class="hidden p-6 sm:p-7 rounded-2xl bg-[#fdfbf7] border-2 border-[#8fad8c] shadow-2xl space-y-5 transition-all">
+      <div id="quick-result-card" class="hidden p-4 sm:p-7 rounded-2xl bg-[#fdfbf7] border-2 border-[#8fad8c] shadow-2xl space-y-4 sm:space-y-5 transition-all">
         
         <!-- Big Verdict Header -->
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#d3e2d0] pb-4">
-          <div class="flex flex-wrap items-center gap-2.5">
-            <span id="result-verdict-pill" class="px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#e8f0e6] text-[#2c3d2a] border-2 border-[#587654] shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2.5 border-b border-[#d3e2d0] pb-3.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="result-verdict-pill" class="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-wider bg-[#e8f0e6] text-[#2c3d2a] border-2 border-[#587654] shadow-sm">
               🟢 GOOD BUY
             </span>
-            <span id="result-confidence-pill" class="px-3 py-1 rounded-full text-xs font-semibold bg-[#edf4eb] text-[#465e43] border border-[#b5ccb1]">
+            <span id="result-confidence-pill" class="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-[#edf4eb] text-[#465e43] border border-[#b5ccb1]">
               Verified Maker
             </span>
           </div>
   
           <div class="text-xs text-[#587654] font-mono">
-            <span>eBay Sold Average: </span>
+            <span>eBay Sold Avg: </span>
             <strong id="result-comp-price-head" class="text-base text-[#2c2016] font-bold font-mono">$0.00</strong>
           </div>
         </div>
   
         <!-- The Punchy Quick Answer -->
-        <div class="p-4 rounded-xl bg-gradient-to-r from-[#f0f5ee] to-[#f8f6ee] border-l-4 border-[#587654] space-y-1">
-          <p class="text-xs font-bold uppercase tracking-wider text-[#587654]">Sourcing Verdict &amp; Rule</p>
-          <h3 id="result-rule-text" class="text-base sm:text-lg font-extrabold text-[#172118]">
+        <div class="p-3.5 sm:p-4 rounded-xl bg-gradient-to-r from-[#f0f5ee] to-[#f8f6ee] border-l-4 border-[#587654] space-y-1">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-[#587654]">Sourcing Verdict &amp; Rule</p>
+          <h3 id="result-rule-text" class="text-sm sm:text-lg font-extrabold text-[#172118] leading-snug">
             Pay up to $0.00 for 3x return.
           </h3>
         </div>
   
         <!-- Identified Item Name & Maker -->
         <div class="space-y-1.5">
-          <h2 id="result-item-name" class="font-brand font-bold text-xl sm:text-2xl text-[#2c2016]">
+          <h2 id="result-item-name" class="font-brand font-bold text-lg sm:text-2xl text-[#2c2016] leading-snug">
             Item Name
           </h2>
           <p id="result-maker-text" class="text-xs sm:text-sm text-[#587654]">
@@ -313,50 +310,54 @@
           </p>
         </div>
   
-        <!-- Key Financial Snapshot -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
-          <div class="p-3.5 rounded-xl bg-[#f8faf7] border border-[#d3e2d0] text-center">
-            <span class="block text-[11px] font-sans text-[#587654] uppercase tracking-wide">3x Net Buy Limit</span>
-            <strong id="result-target3x-val" class="text-xl font-black text-[#b8860b]">$0.00</strong>
+        <!-- Key Financial Snapshot (3-Column Horizontal Even on Mobile) -->
+        <div class="grid grid-cols-3 gap-2 sm:gap-3 font-mono">
+          <div class="p-2.5 sm:p-3.5 rounded-xl bg-[#f8faf7] border border-[#d3e2d0] text-center">
+            <span class="block text-[10px] sm:text-[11px] font-sans text-[#587654] uppercase tracking-wide">3x Limit</span>
+            <strong id="result-target3x-val" class="text-base sm:text-xl font-black text-[#b8860b]">$0.00</strong>
           </div>
-          <div class="p-3.5 rounded-xl bg-[#f8faf7] border border-[#d3e2d0] text-center">
-            <span class="block text-[11px] font-sans text-[#587654] uppercase tracking-wide">Avg Sold Price</span>
-            <strong id="result-comp-val" class="text-xl font-black text-[#2c2016]">$0.00</strong>
+          <div class="p-2.5 sm:p-3.5 rounded-xl bg-[#f8faf7] border border-[#d3e2d0] text-center">
+            <span class="block text-[10px] sm:text-[11px] font-sans text-[#587654] uppercase tracking-wide">Sold Avg</span>
+            <strong id="result-comp-val" class="text-base sm:text-xl font-black text-[#2c2016]">$0.00</strong>
           </div>
-          <div class="p-3.5 rounded-xl bg-[#f8faf7] border border-[#d3e2d0] text-center">
-            <span class="block text-[11px] font-sans text-[#587654] uppercase tracking-wide">Est. Net Profit</span>
-            <strong id="result-profit-val" class="text-xl font-black text-[#2e5229]">+$0.00</strong>
+          <div class="p-2.5 sm:p-3.5 rounded-xl bg-[#f8faf7] border border-[#d3e2d0] text-center">
+            <span class="block text-[10px] sm:text-[11px] font-sans text-[#587654] uppercase tracking-wide">Net Profit</span>
+            <strong id="result-profit-val" class="text-base sm:text-xl font-black text-[#2e5229]">+$0.00</strong>
           </div>
         </div>
   
         <!-- Primary Action Buttons -->
-        <div class="flex flex-wrap items-center gap-3 pt-2">
-          <button id="btn-quick-bought" class="flex-1 sm:flex-none px-6 py-3.5 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
-            <span id="bought-btn-icon">✅</span>
-            <span id="bought-btn-label">Mark as Bought</span>
-          </button>
+        <div class="space-y-2.5 pt-1">
+          <div class="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2.5">
+            <button id="btn-quick-bought" class="w-full sm:w-auto px-6 py-3.5 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+              <span id="bought-btn-icon">✅</span>
+              <span id="bought-btn-label">Mark as Bought</span>
+            </button>
+    
+            <div class="grid grid-cols-2 sm:flex gap-2.5">
+              <button id="btn-see-details" class="px-4 py-3 bg-gradient-to-r from-[#c59b27] via-[#e2be58] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-xs sm:text-sm rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-1.5">
+                <span>Full Details</span>
+                <span>➔</span>
+              </button>
+      
+              <button id="btn-snap-next" class="px-4 py-3 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] font-bold text-xs sm:text-sm rounded-xl shadow-md active:scale-95 transition flex items-center justify-center gap-1.5">
+                <span>📸 Snap Next</span>
+              </button>
+            </div>
+          </div>
   
-          <button id="btn-see-details" class="flex-1 sm:flex-none px-5 py-3.5 bg-gradient-to-r from-[#c59b27] via-[#e2be58] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
-            <span>See Full Details &amp; Audit</span>
-            <span>➔</span>
-          </button>
-  
-          <button id="btn-snap-next" class="flex-1 sm:flex-none px-4 py-3.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] font-bold text-sm sm:text-base rounded-xl shadow-md active:scale-95 transition flex items-center justify-center gap-2">
-            <span>📸 Snap Next</span>
-          </button>
-  
-          <!-- Live Comps Links -->
-          <div class="flex flex-wrap items-center gap-2 ml-auto w-full sm:w-auto justify-end pt-2 sm:pt-0">
-            <button type="button" id="btn-quick-lens" onclick="openGoogleLens()" class="px-3 py-2 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-lg text-xs font-semibold flex items-center gap-1 transition shadow-sm">
+          <!-- Live Comps Links (2x2 Grid on Mobile, Inline on Desktop) -->
+          <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 pt-1">
+            <button type="button" id="btn-quick-lens" onclick="openGoogleLens()" class="px-3 py-2 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition shadow-sm">
               🌐 Google Lens
             </button>
-            <a id="btn-quick-images" href="#" target="_blank" class="px-3 py-2 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+            <a id="btn-quick-images" href="#" target="_blank" class="px-3 py-2 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition">
               🖼️ Images
             </a>
-            <a id="btn-quick-terapeak" href="#" target="_blank" class="px-3 py-2 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+            <a id="btn-quick-terapeak" href="#" target="_blank" class="px-3 py-2 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition">
               🔍 Terapeak
             </a>
-            <a id="btn-quick-sold" href="#" target="_blank" class="px-3 py-2 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+            <a id="btn-quick-sold" href="#" target="_blank" class="px-3 py-2 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition">
               🛒 eBay Sold
             </a>
           </div>
@@ -367,27 +368,27 @@
     <!-- ========================================== -->
     <!-- TAB 2: LISTING STUDIO & FULL DETAILS       -->
     <!-- ========================================== -->
-    <section id="tab-studio" class="hidden space-y-6">
+    <section id="tab-studio" class="hidden space-y-5">
   
-      <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-[#fdfbf7] border border-[#b5ccb1] shadow-md">
-        <button id="btn-back-to-scout" class="px-4 py-2 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] font-bold text-xs sm:text-sm rounded-lg border border-[#8fad8c] flex items-center gap-2 transition">
-          <span>⬅️</span> Back to Sourcing Scout
+      <div class="flex flex-wrap items-center justify-between gap-2.5 p-3.5 sm:p-4 rounded-xl bg-[#fdfbf7] border border-[#b5ccb1] shadow-md">
+        <button id="btn-back-to-scout" class="px-3.5 py-2 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] font-bold text-xs sm:text-sm rounded-lg border border-[#8fad8c] flex items-center gap-1.5 transition">
+          <span>⬅️</span> Back to Scout
         </button>
   
         <div class="flex items-center gap-2">
-          <button id="btn-sync-gdrive" class="px-4 py-2 bg-[#30472e] hover:bg-[#3d593a] text-[#f5f8f4] font-bold text-xs sm:text-sm rounded-lg shadow flex items-center gap-1.5 transition">
-            <span>🚀</span> Sync to Google Drive
+          <button id="btn-sync-gdrive" class="px-3.5 py-2 bg-[#30472e] hover:bg-[#3d593a] text-[#f5f8f4] font-bold text-xs sm:text-sm rounded-lg shadow flex items-center gap-1.5 transition">
+            <span>🚀</span> Sync Drive
           </button>
-          <button id="btn-save-to-queue" class="px-4 py-2 bg-gradient-to-r from-[#b8860b] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-xs sm:text-sm rounded-lg shadow flex items-center gap-1.5 transition">
-            <span>📦</span> Add to Queue
+          <button id="btn-save-to-queue" class="px-3.5 py-2 bg-gradient-to-r from-[#b8860b] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-xs sm:text-sm rounded-lg shadow flex items-center gap-1.5 transition">
+            <span>📦</span> Queue
           </button>
         </div>
       </div>
   
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
   
         <!-- Left Column: Financial Audit & Margin Breakdown (5 cols) -->
-        <div class="lg:col-span-5 space-y-5 bg-[#fdfbf7] p-5 sm:p-6 rounded-2xl border-2 border-[#b5ccb1] shadow-xl">
+        <div class="lg:col-span-5 space-y-4 bg-[#fdfbf7] p-4 sm:p-6 rounded-2xl border-2 border-[#b5ccb1] shadow-xl">
           <div class="border-b border-[#d3e2d0] pb-3">
             <h3 class="font-brand font-bold text-base text-[#2c2016] flex items-center gap-2">
               <span>💰</span>
@@ -396,7 +397,7 @@
             <p class="text-xs text-[#587654]">Includes 7% buyer tax buffer on FVF base &amp; buyer-pays-shipping defaults.</p>
           </div>
   
-          <div class="space-y-4">
+          <div class="space-y-3.5">
             <div class="space-y-1">
               <label class="block text-xs font-bold text-[#587654] uppercase">Item Name / Working Title</label>
               <input type="text" id="input-item-name" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-semibold text-[#2c2016] focus:outline-none focus:border-[#587654]" placeholder="Item title">
@@ -452,7 +453,7 @@
               </div>
             </div>
   
-            <div class="p-4 rounded-xl bg-[#f4f8f3] border border-[#d3e2d0] space-y-2 text-xs font-mono">
+            <div class="p-3.5 rounded-xl bg-[#f4f8f3] border border-[#d3e2d0] space-y-2 text-xs font-mono">
               <div class="flex justify-between text-[#587654]">
                 <span>Gross Buyer Total (Comp + Ship):</span>
                 <span id="calc-gross" class="font-bold text-[#2c2016]">$0.00</span>
@@ -491,19 +492,19 @@
         </div>
   
         <!-- Right Column: SEO Listing Studio & Forensic Audit (7 cols) -->
-        <div class="lg:col-span-7 space-y-5 bg-[#fdfbf7] p-5 sm:p-6 rounded-2xl border-2 border-[#b5ccb1] shadow-xl">
+        <div class="lg:col-span-7 space-y-4 bg-[#fdfbf7] p-4 sm:p-6 rounded-2xl border-2 border-[#b5ccb1] shadow-xl">
           <div class="border-b border-[#d3e2d0] pb-3 flex items-center justify-between">
             <h3 class="font-brand font-bold text-base text-[#2c2016] flex items-center gap-2">
               <span>📝</span>
               <span>eBay SEO Listing Studio &amp; Forensic Audit</span>
             </h3>
-            <span class="text-xs text-[#587654] font-mono">1-Click Copy Ready</span>
+            <span class="text-xs text-[#587654] font-mono">1-Click Copy</span>
           </div>
 
           <!-- Live Search Grounding & Mark Permutations Audit Box -->
           <div id="grounding-audit-box" class="p-3.5 rounded-xl bg-[#f4f8f3] border border-[#8fad8c] space-y-2 text-xs">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-[#2c3d2a] uppercase tracking-wider">🔬 Forensic OCR &amp; Live Search Grounding Audit</span>
+            <div class="flex flex-wrap items-center justify-between gap-1.5">
+              <span class="font-bold text-[#2c3d2a] uppercase tracking-wider">🔬 Forensic OCR &amp; Search Audit</span>
               <span id="audit-model-badge" class="font-mono text-[11px] px-2 py-0.5 rounded bg-[#e8f0e6] text-[#2c3d2a] border border-[#b5ccb1]">—</span>
             </div>
             <div class="text-[#2c2016]">
@@ -598,53 +599,81 @@
     </section>
   
     <!-- ========================================== -->
-    <!-- TAB 3: INVENTORY QUEUE                    -->
+    <!-- TAB 3: MOBILE-FIRST INVENTORY QUEUE        -->
     <!-- ========================================== -->
-    <section id="tab-queue" class="hidden space-y-6">
-      <div class="p-5 sm:p-6 rounded-2xl bg-[#fdfbf7] border-2 border-[#b5ccb1] shadow-xl space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#d3e2d0] pb-3">
+    <section id="tab-queue" class="hidden space-y-4 sm:space-y-5">
+      <div class="p-4 sm:p-6 rounded-2xl bg-[#fdfbf7] border-2 border-[#b5ccb1] shadow-xl space-y-4">
+        
+        <!-- Header & Sheet Link -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d3e2d0] pb-3">
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="font-brand font-bold text-lg text-[#2c2016]">Sourcing Session History</h3>
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#e8f0e6] text-[#2c3d2a] border border-[#b5ccb1]">
+              <h3 class="font-brand font-bold text-base sm:text-lg text-[#2c2016]">Sourcing Session History</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#e8f0e6] text-[#2c3d2a] border border-[#b5ccb1]">
                 Auto-Saved
               </span>
             </div>
-            <p class="text-xs text-[#587654]">Every item evaluated is automatically saved below. Mark items you purchase to auto-sync to Google Drive.</p>
+            <p class="text-xs text-[#587654] mt-0.5">Tap <strong>Buy ($)</strong> to record cost &amp; sync to Drive, or <strong>Studio</strong> to edit &amp; list.</p>
           </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <a href="https://docs.google.com/spreadsheets/d/1-mI7b9aE30oDxsCeZ1jAvrMcYQgub44vQB6vWOgGcqE/edit" target="_blank" class="px-3.5 py-1.5 bg-[#1e2a20] hover:bg-[#28382b] text-[#e8f0e6] border border-[#587654] rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-              <span class="text-[#c59b27]">📁</span> Open Drive Inventory Sheet ➔
+
+          <div class="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2">
+            <a href="https://docs.google.com/spreadsheets/d/1-mI7b9aE30oDxsCeZ1jAvrMcYQgub44vQB6vWOgGcqE/edit" target="_blank" class="px-2.5 sm:px-3.5 py-2 bg-[#1e2a20] hover:bg-[#28382b] text-[#e8f0e6] border border-[#587654] rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1 shadow-sm">
+              <span class="text-[#c59b27]">📁</span> <span>Sheet ➔</span>
             </a>
-            <button id="btn-export-csv" class="px-3 py-1.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] rounded-xl text-xs font-bold transition flex items-center gap-1">
-              <span>📥</span> Export CSV
+            <button id="btn-export-csv" class="px-2.5 sm:px-3 py-2 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1">
+              <span>📥</span> <span>CSV</span>
             </button>
-            <button id="btn-clear-queue" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl text-xs font-bold transition">
-              Clear History
+            <button id="btn-clear-queue" class="px-2.5 sm:px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center justify-center">
+              Clear
             </button>
           </div>
         </div>
   
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono pt-1">
-          <div class="p-3 bg-[#f8faf7] border border-[#d3e2d0] rounded-xl flex items-center justify-between">
-            <span class="text-xs font-sans text-[#587654]">Total Scanned:</span>
-            <strong id="queue-stat-scanned" class="text-base text-[#2c2016]">0 items</strong>
+        <!-- Compact 3-Column Session KPI Strip (Fits 1 Row on Mobile) -->
+        <div class="grid grid-cols-3 gap-2 sm:gap-3 font-mono">
+          <div class="p-2.5 sm:p-3 bg-[#f8faf7] border border-[#d3e2d0] rounded-xl text-center sm:flex sm:items-center sm:justify-between">
+            <span class="block text-[10px] sm:text-xs font-sans text-[#587654]">Scanned</span>
+            <strong id="queue-stat-scanned" class="text-sm sm:text-base text-[#2c2016]">0</strong>
           </div>
-          <div class="p-3 bg-[#eaf3e8] border border-[#b5ccb1] rounded-xl flex items-center justify-between">
-            <span class="text-xs font-sans text-[#2c3d2a]">Marked as Bought:</span>
-            <strong id="queue-stat-bought" class="text-base text-[#244220]">0 items</strong>
+          <div class="p-2.5 sm:p-3 bg-[#eaf3e8] border border-[#b5ccb1] rounded-xl text-center sm:flex sm:items-center sm:justify-between">
+            <span class="block text-[10px] sm:text-xs font-sans text-[#2c3d2a]">Bought</span>
+            <strong id="queue-stat-bought" class="text-sm sm:text-base text-[#244220]">0</strong>
           </div>
-          <div class="p-3 bg-[#fdfbf7] border border-[#c59b27] rounded-xl flex items-center justify-between">
-            <span class="text-xs font-sans text-[#7d5738]">Sourced Profit:</span>
-            <strong id="queue-stat-profit" class="text-base text-emerald-800 font-bold">$0.00</strong>
+          <div class="p-2.5 sm:p-3 bg-[#fdfbf7] border border-[#c59b27] rounded-xl text-center sm:flex sm:items-center sm:justify-between">
+            <span class="block text-[10px] sm:text-xs font-sans text-[#7d5738]">Est. Profit</span>
+            <strong id="queue-stat-profit" class="text-sm sm:text-base text-emerald-800 font-bold">$0.00</strong>
           </div>
         </div>
+
+        <!-- Mobile & Desktop Filter Pills -->
+        <div class="flex items-center gap-2 pt-0.5">
+          <button type="button" id="filter-queue-all" onclick="setQueueFilter('all')" class="px-3 py-1 rounded-full text-xs font-bold bg-[#2c3d2a] text-[#fdfbf7] transition">
+            All Items
+          </button>
+          <button type="button" id="filter-queue-bought" onclick="setQueueFilter('bought')" class="px-3 py-1 rounded-full text-xs font-semibold bg-[#edf4eb] text-[#2c3d2a] border border-[#b5ccb1] transition">
+            ✅ Bought Only
+          </button>
+          <button type="button" id="filter-queue-unbought" onclick="setQueueFilter('unbought')" class="px-3 py-1 rounded-full text-xs font-semibold bg-[#edf4eb] text-[#2c3d2a] border border-[#b5ccb1] transition">
+            🔍 Scouted Only
+          </button>
+        </div>
   
-        <div class="overflow-x-auto custom-scroll">
+        <!-- Empty State -->
+        <p id="queue-empty-msg" class="text-center py-8 text-xs text-[#587654] font-medium">
+          No items in queue yet. Evaluate an item in Sourcing Scout to log it here automatically.
+        </p>
+
+        <!-- MOBILE CARD STACK (< 768px): Full-width readable titles, 4-metric grid, thumb-friendly buttons -->
+        <div id="queue-mobile-cards" class="md:hidden space-y-3">
+          <!-- Dynamic mobile cards injected here -->
+        </div>
+
+        <!-- DESKTOP TABLE (>= 768px) -->
+        <div id="queue-desktop-table-wrap" class="hidden md:block overflow-x-auto custom-scroll">
           <table class="w-full text-left text-xs border-collapse">
             <thead>
               <tr class="border-b-2 border-[#b5ccb1] text-[#587654] font-bold uppercase">
-                <th class="py-2.5 px-3">Item Name</th>
+                <th class="py-2.5 px-3 min-w-[240px]">Item Name</th>
                 <th class="py-2.5 px-3">Verdict</th>
                 <th class="py-2.5 px-3">Comp</th>
                 <th class="py-2.5 px-3">Buy</th>
@@ -656,9 +685,6 @@
             <tbody id="queue-table-body" class="divide-y divide-[#d3e2d0]">
             </tbody>
           </table>
-          <p id="queue-empty-msg" class="text-center py-8 text-xs text-[#587654] font-medium">
-            No items in queue yet. Evaluate an item in Sourcing Scout and click <strong>Add to Queue</strong>.
-          </p>
         </div>
       </div>
     </section>
@@ -667,7 +693,7 @@
     <!-- TAB 4: SETTINGS & GEMINI API KEY           -->
     <!-- ========================================== -->
     <section id="tab-settings" class="hidden space-y-6">
-      <div class="p-5 sm:p-7 rounded-2xl bg-[#fdfbf7] border-2 border-[#b5ccb1] shadow-xl space-y-6 max-w-3xl mx-auto">
+      <div class="p-4 sm:p-7 rounded-2xl bg-[#fdfbf7] border-2 border-[#b5ccb1] shadow-xl space-y-6 max-w-3xl mx-auto">
         <div class="border-b border-[#d3e2d0] pb-3">
           <h3 class="font-brand font-bold text-lg text-[#2c2016] flex items-center gap-2">
             <span>⚙️</span> System Settings &amp; Integrations
@@ -681,7 +707,7 @@
             <label class="block text-xs font-bold text-[#2c2016] uppercase tracking-wider">
               Google Gemini API Key (High-Res Vision + Search Grounding)
             </label>
-            <span class="text-[11px] text-[#587654]">Stored locally on your device</span>
+            <span class="text-[11px] text-[#587654]">Stored locally</span>
           </div>
           <p class="text-xs text-[#587654]">
             Manage your key in <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline text-[#b8860b] font-semibold">Google AI Studio</a>. Linked Google Cloud billing enables live Google Search Grounding for real-time maker and sold comp verification.
@@ -696,7 +722,7 @@
             </button>
           </div>
           <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <span class="text-[11px] text-[#587654]">Tip: Bookmark the URL after saving so your phone never asks again.</span>
+            <span class="text-[11px] text-[#587654]">Tip: Save this bookmark URL to your phone Home Screen so your key never resets.</span>
             <button type="button" id="btn-copy-magic-url" class="px-3 py-1.5 bg-[#edf4eb] hover:bg-[#e0ece0] border border-[#8fad8c] text-[#2c3d2a] text-[11px] font-bold rounded-lg transition">
               📱 Copy Auto-Key Phone Bookmark URL
             </button>
@@ -771,6 +797,7 @@
     // State Management
     const state = {
       photos: [],
+      queueFilter: 'all',
       current: {
         itemName: "",
         maker: "",
@@ -846,7 +873,6 @@
     }
 
     function resolvePersistedApiKey() {
-      // 1. Check URL #key=... or ?key=... (survives Android home-screen shortcuts & cache clears)
       let urlKey = '';
       try {
         const hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
@@ -910,9 +936,9 @@
       const toast = document.getElementById('toast');
       document.getElementById('toast-icon').textContent = icon;
       document.getElementById('toast-msg').textContent = msg;
-      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-20');
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-24');
       setTimeout(() => {
-        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-20');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-24');
       }, 3200);
     }
   
@@ -1031,7 +1057,6 @@
 
       const modal = document.getElementById('crop-modal');
       const canvas = document.getElementById('crop-canvas');
-      const ctx = canvas.getContext('2d');
 
       const img = new Image();
       img.onload = () => {
@@ -1138,7 +1163,6 @@
       const sw = (cropState.rect.w / canvas.width) * cropState.img.width;
       const sh = (cropState.rect.h / canvas.height) * cropState.img.height;
 
-      // Upscale small mark crop to crisp 1024px+ for high-precision OCR
       const targetScale = Math.max(1, Math.min(3, 1024 / Math.max(sw, sh)));
       const outCanvas = document.createElement('canvas');
       outCanvas.width = Math.round(sw * targetScale);
@@ -1312,7 +1336,7 @@
       const apiKey = (rawKey || '').trim();
   
       if (state.photos.length > 0 && !apiKey) {
-        showToast("Gemini API Key Required! Set in Settings ⚙️", "⚠️");
+        showToast("Gemini API Key Required! Set in Setup ⚙️", "⚠️");
         switchTab('settings');
         return;
       }
@@ -1454,7 +1478,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       const useHighRes = state.settings.highResVision !== false;
   
       for (const model of candidateModels) {
-        // Try combinations: (Search + HighRes) -> (Search only) -> (HighRes only) -> (Standard)
         const configs = [];
         if (useGrounding && useHighRes) configs.push({ search: true, highRes: true });
         if (useGrounding) configs.push({ search: true, highRes: false });
@@ -1500,7 +1523,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
               const errMsg = errBody?.error?.message || `HTTP ${resp.status}`;
               console.warn(`Model ${model} (search=${cfg.search}, highRes=${cfg.highRes}) error: ${errMsg}`);
               lastErr = new Error(errMsg);
-              // If quota exceeded (429), jump straight to next model
               if (resp.status === 429) break;
               continue;
             }
@@ -1609,7 +1631,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       const totalShippingExpense = shipCost + packCost;
 
       const gross = comp + shipCharged;
-      const taxableBase = gross * 1.07; // 7% buyer sales tax buffer
+      const taxableBase = gross * 1.07;
       const fixedFee = gross > 10 ? 0.40 : 0.30;
       const ebayFee = gross > 0 ? ((taxableBase * feeRate) + fixedFee) : 0;
       const netPayout = Math.max(0, gross - ebayFee - totalShippingExpense);
@@ -1661,7 +1683,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       document.getElementById('studio-diag-notes').value = data.diagNotes || '';
       document.getElementById('studio-condition-desc').value = data.conditionDesc || '';
 
-      // Populate Grounding & Permutations Audit Box in Listing Studio
       document.getElementById('audit-model-badge').textContent = data._modelUsed || 'Gemini Vision';
       const perms = Array.isArray(data.alternateReadings) && data.alternateReadings.length > 0
         ? data.alternateReadings.join('  |  ')
@@ -1724,24 +1745,24 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
   
       if (buy > 0) {
         if (buy <= m.target3x) {
-          verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#e8f2e5] text-[#244220] border-2 border-[#587654] shadow-sm";
-          verdictPill.textContent = "🟢 GREAT BUY (3x+ Return)";
+          verdictPill.className = "px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-wider bg-[#e8f2e5] text-[#244220] border-2 border-[#587654] shadow-sm";
+          verdictPill.textContent = "🟢 GREAT BUY (3x+)";
           ruleText.innerHTML = `Buy confirmed! At <span class="text-[#244220] font-black">$${buy.toFixed(2)}</span>, you beat your 3x net limit of <span class="text-[#b8860b] font-black">$${m.target3x.toFixed(2)}</span>. Projected net profit: <span class="text-[#244220] font-black">+$${m.netProfit.toFixed(2)}</span>.`;
         } else if (buy <= m.target2x) {
-          verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#fef9ec] text-[#6d510e] border-2 border-[#c59b27] shadow-sm";
-          verdictPill.textContent = "🟡 CONDITIONAL (2x–3x Return)";
+          verdictPill.className = "px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-wider bg-[#fef9ec] text-[#6d510e] border-2 border-[#c59b27] shadow-sm";
+          verdictPill.textContent = "🟡 CONDITIONAL (2x–3x)";
           ruleText.innerHTML = `Viable flip at <span class="text-[#2c2016] font-black">$${buy.toFixed(2)}</span> (within 2x net limit of $${m.target2x.toFixed(2)}). Estimated net profit: <span class="text-[#244220] font-black">+$${m.netProfit.toFixed(2)}</span>.`;
         } else if (m.netProfit > 0) {
-          verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#fef9ec] text-[#6d510e] border-2 border-[#c59b27] shadow-sm";
+          verdictPill.className = "px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-wider bg-[#fef9ec] text-[#6d510e] border-2 border-[#c59b27] shadow-sm";
           verdictPill.textContent = "🟡 TIGHT MARGIN";
           ruleText.innerHTML = `Asking <span class="text-rose-900 font-bold">$${buy.toFixed(2)}</span> exceeds 2x target ($${m.target2x.toFixed(2)}), leaving <span class="text-[#244220]">+$${m.netProfit.toFixed(2)}</span>. Negotiate under <span class="text-[#b8860b] font-black">$${m.target3x.toFixed(2)}</span>.`;
         } else {
-          verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#fdeeed] text-[#7a201c] border-2 border-[#d97774] shadow-sm";
+          verdictPill.className = "px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-wider bg-[#fdeeed] text-[#7a201c] border-2 border-[#d97774] shadow-sm";
           verdictPill.textContent = "🔴 PASS / BAD BUY";
           ruleText.innerHTML = `Pass! Asking <span class="text-rose-900 font-black">$${buy.toFixed(2)}</span> loses money after eBay fees and shipping (Net payout: $${m.netPayout.toFixed(2)}).`;
         }
       } else {
-        verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#e8f2e5] text-[#244220] border-2 border-[#587654] shadow-sm";
+        verdictPill.className = "px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-wider bg-[#e8f2e5] text-[#244220] border-2 border-[#587654] shadow-sm";
         verdictPill.textContent = "🟢 BUY UNDER TARGET";
         ruleText.innerHTML = `Pay up to <span class="text-[#244220] font-black">$${m.target3x.toFixed(2)}</span> for 3x return (max <span class="text-[#b8860b] font-black">$${m.target2x.toFixed(2)}</span> for 2x). Net payout est: $${m.netPayout.toFixed(2)}.`;
       }
@@ -1756,10 +1777,10 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       const boughtBtn = document.getElementById('btn-quick-bought');
       if (buy > 0) {
         boughtLabel.textContent = `Bought ($${buy.toFixed(2)}) • Synced ☁️`;
-        boughtBtn.className = "flex-1 sm:flex-none px-6 py-3.5 bg-emerald-900 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg border-2 border-emerald-400 active:scale-95 transition flex items-center justify-center gap-2";
+        boughtBtn.className = "w-full sm:w-auto px-6 py-3.5 bg-emerald-900 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg border-2 border-emerald-400 active:scale-95 transition flex items-center justify-center gap-2";
       } else {
         boughtLabel.textContent = "Mark as Bought";
-        boughtBtn.className = "flex-1 sm:flex-none px-6 py-3.5 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2";
+        boughtBtn.className = "w-full sm:w-auto px-6 py-3.5 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2";
       }
   
       const scanItem = {
@@ -1836,7 +1857,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
   
       document.getElementById('bought-btn-label').textContent = `Purchased ($${enteredPrice.toFixed(2)}) • Synced ☁️`;
       const boughtBtn = document.getElementById('btn-quick-bought');
-      boughtBtn.className = "flex-1 sm:flex-none px-6 py-3.5 bg-emerald-900 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg border-2 border-emerald-400 active:scale-95 transition flex items-center justify-center gap-2";
+      boughtBtn.className = "w-full sm:w-auto px-6 py-3.5 bg-emerald-900 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg border-2 border-emerald-400 active:scale-95 transition flex items-center justify-center gap-2";
   
       const payload = getCurrentItemPayload();
       sendToGoogleDrive([payload], `"${payload.name}" saved as Bought & auto-synced to Drive! ☁️`);
@@ -1981,8 +2002,22 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
     });
   
     // ==========================================
-    // QUEUE & GOOGLE DRIVE INTEGRATION
+    // QUEUE & GOOGLE DRIVE INTEGRATION (MOBILE-FIRST CARDS + DESKTOP TABLE)
     // ==========================================
+    window.setQueueFilter = function(filterMode) {
+      state.queueFilter = filterMode;
+      ['all', 'bought', 'unbought'].forEach(mode => {
+        const btn = document.getElementById(`filter-queue-${mode}`);
+        if (!btn) return;
+        if (mode === filterMode) {
+          btn.className = "px-3 py-1 rounded-full text-xs font-bold bg-[#2c3d2a] text-[#fdfbf7] transition";
+        } else {
+          btn.className = "px-3 py-1 rounded-full text-xs font-semibold bg-[#edf4eb] text-[#2c3d2a] border border-[#b5ccb1] transition";
+        }
+      });
+      renderQueue();
+    };
+
     function getCurrentItemPayload() {
       const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
       const buy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
@@ -2022,7 +2057,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
     async function sendToGoogleDrive(itemsArray, successMsg) {
       const webhookUrl = (state.settings.gdriveWebhook || '').trim();
       if (!webhookUrl) {
-        showToast("Set Google Drive Webhook URL in Settings ⚙️", "⚠️");
+        showToast("Set Google Drive Webhook URL in Setup ⚙️", "⚠️");
         return false;
       }
 
@@ -2080,6 +2115,8 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
 
     function renderQueue() {
       const tbody = document.getElementById('queue-table-body');
+      const mobileCards = document.getElementById('queue-mobile-cards');
+      const desktopWrap = document.getElementById('queue-desktop-table-wrap');
       const emptyMsg = document.getElementById('queue-empty-msg');
       const badge = document.getElementById('queue-count');
   
@@ -2094,27 +2131,113 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       const totalBought = boughtItems.length;
       const totalProfit = boughtItems.reduce((acc, i) => acc + (i.profit || 0), 0);
   
-      if (statScanned) statScanned.textContent = `${totalScanned} item${totalScanned !== 1 ? 's' : ''}`;
-      if (statBought) statBought.textContent = `${totalBought} item${totalBought !== 1 ? 's' : ''}`;
+      if (statScanned) statScanned.textContent = `${totalScanned}`;
+      if (statBought) statBought.textContent = `${totalBought}`;
       if (statProfit) {
         statProfit.textContent = `${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}`;
-        statProfit.className = totalProfit >= 0 ? "text-base text-emerald-800 font-black" : "text-base text-rose-800 font-black";
+        statProfit.className = totalProfit >= 0 ? "text-sm sm:text-base text-emerald-800 font-black" : "text-sm sm:text-base text-rose-800 font-black";
       }
+
+      const filteredWithIdx = state.queue
+        .map((item, idx) => ({ item, idx }))
+        .filter(({ item }) => {
+          if (state.queueFilter === 'bought') return !!item.bought;
+          if (state.queueFilter === 'unbought') return !item.bought;
+          return true;
+        });
   
-      if (state.queue.length === 0) {
+      if (filteredWithIdx.length === 0) {
         tbody.innerHTML = '';
+        mobileCards.innerHTML = '';
+        emptyMsg.textContent = state.queue.length === 0
+          ? "No items in queue yet. Evaluate an item in Sourcing Scout to log it here automatically."
+          : "No items match the selected filter.";
         emptyMsg.classList.remove('hidden');
         return;
       }
   
       emptyMsg.classList.add('hidden');
-      tbody.innerHTML = state.queue.map((item, idx) => `
+
+      // 1. Render Mobile-First Cards (< 768px)
+      mobileCards.innerHTML = filteredWithIdx.map(({ item, idx }) => {
+        const isBought = !!item.bought;
+        const profitPositive = (item.profit || 0) >= 0;
+        const cardBorder = isBought ? 'border-emerald-600/70 bg-[#f2f8f1]' : 'border-[#b5ccb1] bg-[#f8faf7]';
+        const verdictBadgeClass = (item.verdict || '').includes('🔴')
+          ? 'bg-[#fdeeed] text-[#7a201c] border-[#d97774]'
+          : (item.verdict || '').includes('🟡')
+            ? 'bg-[#fef9ec] text-[#6d510e] border-[#c59b27]'
+            : 'bg-[#e8f2e5] text-[#244220] border-[#587654]';
+
+        return `
+          <div class="p-3.5 rounded-xl border-2 ${cardBorder} shadow-sm space-y-3">
+            <!-- Top Header: Full-width Title & Status Pill -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide border ${verdictBadgeClass}">
+                  ${item.verdict || 'Scouted'}
+                </span>
+                ${isBought
+                  ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-800 text-[#f5f8f4]">✅ Bought ☁️</span>`
+                  : `<span class="text-[10px] font-mono text-[#72926d]">${item.dateAdded || ''}</span>`
+                }
+              </div>
+              <h4 class="font-bold text-sm text-[#1c140c] leading-snug break-words">
+                ${item.name}
+              </h4>
+              <p class="text-[11px] text-[#587654] font-medium">
+                Maker: <span class="text-[#2c2016] font-semibold">${item.maker || 'Unmarked / Unknown'}</span>
+              </p>
+            </div>
+
+            <!-- Middle 4-Metric Grid (Comp, 3x Limit, Buy Paid, Net Profit) -->
+            <div class="grid grid-cols-4 gap-1.5 p-2 rounded-lg bg-[#fdfbf7] border border-[#d3e2d0] font-mono text-center">
+              <div>
+                <span class="block text-[9px] font-sans text-[#587654] uppercase">Comp</span>
+                <strong class="text-xs font-extrabold text-[#b8860b]">$${(item.comp || 0).toFixed(2)}</strong>
+              </div>
+              <div>
+                <span class="block text-[9px] font-sans text-[#587654] uppercase">3x Limit</span>
+                <strong class="text-xs font-extrabold text-[#1c140c]">$${(item.target3x || 0).toFixed(2)}</strong>
+              </div>
+              <div>
+                <span class="block text-[9px] font-sans text-[#587654] uppercase">Buy Paid</span>
+                <strong class="text-xs font-black ${isBought ? 'text-[#244220]' : 'text-[#778c74]'}">
+                  ${isBought ? `$${(item.buy || 0).toFixed(2)}` : '—'}
+                </strong>
+              </div>
+              <div>
+                <span class="block text-[9px] font-sans text-[#587654] uppercase">Net Profit</span>
+                <strong class="text-xs font-black ${profitPositive ? 'text-[#244220]' : 'text-rose-800'}">
+                  ${profitPositive ? '+' : ''}$${(item.profit || 0).toFixed(2)}
+                </strong>
+              </div>
+            </div>
+
+            <!-- Bottom Full-Width Thumb-Friendly Action Row -->
+            <div class="flex items-center gap-2">
+              <button onclick="markQueueItemBought(${idx})" class="flex-1 py-2.5 px-3 ${isBought ? 'bg-emerald-900/90 hover:bg-emerald-800 border border-emerald-500' : 'bg-emerald-800 hover:bg-emerald-700'} text-[#f5f8f4] text-xs font-extrabold rounded-xl shadow-sm active:scale-95 transition flex items-center justify-center gap-1.5">
+                <span>${isBought ? '✏️ Edit Buy ($)' : '💰 Mark Bought ($)'}</span>
+              </button>
+              <button onclick="loadQueueItem(${idx})" class="flex-1 py-2.5 px-3 bg-[#edf4eb] hover:bg-[#e0ece0] border border-[#8fad8c] text-[#2c3d2a] text-xs font-bold rounded-xl active:scale-95 transition flex items-center justify-center gap-1">
+                <span>📝 Studio</span>
+              </button>
+              <button onclick="deleteQueueItem(${idx})" class="py-2.5 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 text-xs font-bold rounded-xl active:scale-95 transition" title="Delete">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 2. Render Desktop Table (>= 768px)
+      tbody.innerHTML = filteredWithIdx.map(({ item, idx }) => `
         <tr class="hover:bg-[#f4f8f3] text-[#2c2016] transition">
           <td class="py-2.5 px-3">
             <strong class="block font-semibold text-[#1c140c]">${item.name}</strong>
             <span class="text-[11px] text-[#587654]">${item.maker || 'Unmarked'}</span>
           </td>
-          <td class="py-2.5 px-3 text-[#587654]">${item.verdict || 'Scouted'}</td>
+          <td class="py-2.5 px-3 text-[#587654] whitespace-nowrap">${item.verdict || 'Scouted'}</td>
           <td class="py-2.5 px-3 text-[#b8860b] font-bold font-mono">$${item.comp.toFixed(2)}</td>
           <td class="py-2.5 px-3 font-mono">
             ${item.bought ? `<span class="text-[#244220] font-black">$${item.buy.toFixed(2)}</span>` : `<span class="text-[#778c74]">—</span>`}
@@ -2125,7 +2248,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
           <td class="py-2.5 px-3 text-[#1c140c] font-mono">$${item.target3x.toFixed(2)}</td>
           <td class="py-2.5 px-3 text-right whitespace-nowrap">
             ${item.bought 
-              ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-900 border border-emerald-400 rounded-lg text-[11px] font-bold mr-1">✅ Bought ☁️</span>`
+              ? `<button onclick="markQueueItemBought(${idx})" class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-400 rounded-lg text-[11px] font-bold mr-1 transition">✅ Bought ☁️</button>`
               : `<button onclick="markQueueItemBought(${idx})" class="px-2.5 py-1 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] text-[11px] font-bold rounded-lg shadow mr-1 transition">Buy ($)</button>`
             }
             <button onclick="loadQueueItem(${idx})" class="px-2 py-1 bg-[#edf4eb] hover:bg-[#e0ece0] border border-[#8fad8c] text-[11px] font-semibold rounded text-[#2c3d2a] mr-1">Load</button>
@@ -2183,7 +2306,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
         soldUrl: `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`
       };
   
-      sendToGoogleDrive([payload], `"${item.name}" marked as Bought & auto-synced to Google Drive! ☁️`);
+      sendToGoogleDrive([payload], `"${item.name}" saved as Bought ($${price.toFixed(2)}) & synced to Drive! ☁️`);
     };
   
     window.loadQueueItem = function(idx) {
@@ -2192,6 +2315,8 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
   
       if (item.data) {
         populateItemData(item.data);
+        document.getElementById('input-buy-cost').value = (item.buy || 0).toFixed(2);
+        calculateFinancials();
       } else {
         document.getElementById('input-item-name').value = item.name;
         document.getElementById('input-maker').value = item.maker;
