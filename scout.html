@@ -789,170 +789,30 @@
       }, 3000);
     }
 
-    // Helper: Convert any dataURL or blob to guaranteed PNG blob for universal clipboard support
-    function dataUrlToPngBlob(dataUrl) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          const cvs = document.createElement('canvas');
-          cvs.width = img.width;
-          cvs.height = img.height;
-          const ctx = cvs.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-          cvs.toBlob((blob) => resolve(blob), 'image/png');
-        };
-        img.onerror = () => resolve(null);
-        img.src = dataUrl;
-      });
-    }
-
-    // Universal multi-photo collage: stitches ANY number of photos (2, 3, 4, 5+) into a clean high-res grid for Google Lens
-    function createMultiPhotoBlob(photos) {
-      return new Promise((resolve) => {
-        if (!photos || photos.length === 0) return resolve(null);
-        if (photos.length === 1) return resolve(dataUrlToPngBlob(photos[0].dataUrl));
-
-        const count = photos.length;
-        const loadedImgs = [];
-        let loadedCount = 0;
-
-        const onAllLoaded = () => {
-          // Standardize cell height to keep resolution crisp
-          const cellH = 600;
-          const cellWidths = loadedImgs.map(img => Math.round((cellH / img.height) * img.width));
-
-          // Determine layout:
-          // 2 or 3 photos -> 1 horizontal row
-          // 4 photos -> 2x2 grid
-          // 5 or 6 photos -> 2 rows
-          // 7+ photos -> 3 per row
-          let cols = count <= 3 ? count : (count === 4 ? 2 : Math.ceil(Math.sqrt(count)));
-          let rows = Math.ceil(count / cols);
-
-          // Calculate grid dimensions
-          let maxRowW = 0;
-          for (let r = 0; r < rows; r++) {
-            let rowW = 0;
-            for (let c = 0; c < cols; c++) {
-              let idx = r * cols + c;
-              if (idx < count) {
-                rowW += cellWidths[idx] + (c > 0 ? 15 : 0);
-              }
-            }
-            if (rowW > maxRowW) maxRowW = rowW;
+    async function openGoogleLens() {
+      if (state.photos && state.photos.length > 0) {
+        const photo = state.photos[0];
+        let copied = false;
+        if (navigator.clipboard && window.ClipboardItem && photo.dataUrl) {
+          try {
+            const res = await fetch(photo.dataUrl);
+            const blob = await res.blob();
+            await navigator.clipboard.write([
+              new ClipboardItem({ [blob.type || 'image/jpeg']: blob })
+            ]);
+            copied = true;
+          } catch (err) {
+            console.log('Clipboard write not permitted:', err);
           }
-
-          const totalW = maxRowW;
-          const totalH = (rows * cellH) + ((rows - 1) * 15);
-
-          const canvas = document.createElement('canvas');
-          canvas.width = totalW;
-          canvas.height = totalH;
-          const ctx = canvas.getContext('2d');
-
-          // Clean white background
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          // Draw each photo into its grid position
-          for (let r = 0; r < rows; r++) {
-            let currentX = 0;
-            let currentY = r * (cellH + 15);
-            for (let c = 0; c < cols; c++) {
-              let idx = r * cols + c;
-              if (idx < count) {
-                let img = loadedImgs[idx];
-                let w = cellWidths[idx];
-                ctx.drawImage(img, currentX, currentY, w, cellH);
-
-                // Subtle divider border
-                ctx.strokeStyle = '#d3e2d0';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(currentX, currentY, w, cellH);
-
-                currentX += w + 15;
-              }
-            }
-          }
-
-          canvas.toBlob((blob) => resolve(blob), 'image/png');
-        };
-
-        for (let i = 0; i < count; i++) {
-          const img = new Image();
-          img.onload = () => {
-            loadedCount++;
-            if (loadedCount === count) onAllLoaded();
-          };
-          img.onerror = () => {
-            loadedCount++;
-            if (loadedCount === count) onAllLoaded();
-          };
-          img.src = photos[i].dataUrl;
-          loadedImgs.push(img);
         }
-      });
-    }
-
-    // Trigger instant download fallback if user clipboard is blocked by browser permissions
-    function downloadPhotoFallback(dataUrl, filename = 'sourcing_photo.jpg') {
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
-    async function openGoogleLens(photoIndex = null) {
-      if (!state.photos || state.photos.length === 0) {
-        showToast('Attach a photo first to search Google Lens 🌐', '⚠️');
-        window.open('https://lens.google.com/', '_blank');
-        return;
-      }
-
-      let copied = false;
-      let isMulti = state.photos.length >= 2 && photoIndex === null;
-
-      // CRITICAL FIX: To prevent browser user gesture expiration, pass a Promise directly into ClipboardItem
-      // so navigator.clipboard.write is initiated synchronously during the user click event!
-      if (navigator.clipboard && window.ClipboardItem) {
-        try {
-          const blobPromise = new Promise(async (resolve, reject) => {
-            try {
-              const b = isMulti 
-                ? await createMultiPhotoBlob(state.photos)
-                : await dataUrlToPngBlob(state.photos[photoIndex || 0].dataUrl);
-              if (b) resolve(b);
-              else reject(new Error('Failed to create image blob'));
-            } catch (err) {
-              reject(err);
-            }
-          });
-
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blobPromise })
-          ]);
-          copied = true;
-        } catch (err) {
-          console.warn('Synchronous ClipboardItem promise failed, attempting fallback...', err);
-        }
-      }
-
-      if (copied) {
-        if (isMulti) {
-          showToast(`All ${state.photos.length} photos stitched & copied! Press Ctrl+V in Lens 📸`, '✅');
+        if (copied) {
+          showToast('Photo copied to clipboard! Paste directly into Lens 🌐', '📸');
         } else {
-          showToast('Photo copied to clipboard! Press Ctrl+V in Lens 📸', '✅');
+          showToast('Opening Google Lens... Upload your photo 🌐', '📸');
         }
       } else {
-        // Fallback: download the photo instantly so user can drag or click "upload a file" in 1 second
-        const targetPhoto = state.photos[photoIndex || 0];
-        downloadPhotoFallback(targetPhoto.dataUrl, 'yamis_find_' + (targetPhoto.name || 'scout.jpg'));
-        showToast('Photo downloaded! Click "upload a file" in Google Lens 🌐', '📥');
+        showToast('Opening Google Lens... 🌐', '🔍');
       }
-
-      // Open Google Lens in a new tab
       window.open('https://lens.google.com/', '_blank');
     }
 
@@ -1212,30 +1072,20 @@
       const prompt = `You are the master vintage authenticator, antique appraiser, and eBay arbitrage analyst for Yami's Attic Treasures.
 Analyze the provided photo(s) using our rigorous 4-step forensic identification protocol:
 
-STEP 1: UNIVERSAL FORENSIC IDENTIFICATION & MARK DECIPHERMENT (TOP PRIORITY)
-- Scrutinize ALL surfaces, undersides, bases, footrings, rims, handles, borders, backs, and recessed areas for ANY maker, author, or manufacturer indicators across all industries:
-  * Manufacturer Backstamps & Trademarks: Factory logos, underglaze stamps, transferware marks, impressed shields/crests, mold numbers, country of origin (e.g. Meissen, Royal Doulton, Nippon, Occupied Japan, Wedgwood, Roseville, Rookwood).
-  * Artist, Author & Craftsman Signatures: Incised signatures in clay, painted artist signatures/monograms on canvas/board, pencil edition numbering, sgraffito script, sculptor foundry marks, book author signatures, publisher imprints.
-  * Silver, Metalware & Pewter: Hallmarks, purity stamps ('800', '830', '900', '925', 'STERLING', 'COIN'), silversmith punchmarks/monograms (e.g. 'BZ', 'Gorham', 'Tiffany'), assay marks, touchmarks, cast iron gate marks and catalog numbers (e.g. Griswold, Wagner).
-  * Jewelry & Timepieces: Purity stamps (10k, 14k, 18k, 925, Platinum), designer/maker cartouches (e.g. Trifari, Coro, Eisenberg, David Yurman), watch movement markings, case numbers.
-  * Art Glass & Crystal: Acid-etched stamps, sandblasted logos, diamond-point engraved signatures, pontil polish marks, paper/foil label remnants (e.g. Murano, Blenko, Fenton, Lalique, Baccarat).
-  * Mid-Century, Furniture & Collectibles: Paper labels, metal badges, foil stickers, burned brand stamps, stencils, patent dates/numbers, copyright notices.
-
-CRITICAL SIGNATURE DECIPHERMENT & MOTIF RULES:
-- When deciphering stylized, cursive, or vertical script, generate and test multiple plausible readings:
-  * In art and studio pottery, a small raised letter or dot following an 'M' is almost always 'Mc' (e.g. 'McAndrews' / 'McAndrew', NOT 'M. Andreas' or 'M. Andrew').
-  * The letter 'W' in stylized script often has diagonal crossings that OCR models mistake for 'A'; 'McANDREWS' must never be misclassified as 'M. ANDREAS'.
-  * Correlate signature candidates with signature artisan motifs: a bare whimsical tree silhouette with sgraffito branches, black-and-white checkerboard patterns, and an unglazed matte black stoneware base is the unmistakable hallmark work of late American ceramic artist Roger McAndrew (signed 'McAndrews').
+STEP 1: FORENSIC MARK & HALLMARK DECIPHERMENT (TOP PRIORITY)
+- Examine ALL surfaces: underside, base, footring, rims, handles, cartouches, stems, and borders for ANY markings, stamps, signatures, or symbols:
+  * Silver & Metalware: Scrutinize for hallmarks, purity numbers ('800', '830', '900', '925', 'STERLING'), silversmith initials or monograms (e.g. 'BZ', 'F.lli', maker punches), assay marks, city symbols (Venetian winged lion, Lombardy, French Minerva, English town marks), or classical motifs (caryatid legs, lion paws, putti).
+  * Ceramics & Art Pottery: Scrutinize the foot and design borders for incised clay script, sgraffito border carvings (e.g. cursive signatures like 'McAndrew' / 'McAndrews'), underglaze stamps, mold numbers, or artist initials.
+  * Art Glass: Check base for acid-etched signatures, pontil scarring/polishing, label remnants, or Murano canes.
 - If multiple photos are provided, correlate overall form photos with macro close-up photos of marks.
-- Transcribe every visible letter, number, symbol, cipher, or monogram variant. NEVER classify an item as generic or anonymous if ANY mark, signature, stamp, or label is visible.
+- Transcribe every visible letter, number, or symbol variant. NEVER classify an item as generic or anonymous if any stamped mark, hallmark, or incised lettering is visible.
 
 STEP 2: ARTISTIC TECHNIQUE, MATERIAL & PRODUCTION ERA
 - Identify the exact construction: cast vs. pierced vs. repoussé silver/silverplate, hand-blown cobalt glass liners, sgraffito carving, wax-resist boundaries, unglazed stoneware contrast, or mold seams.
 - Accurately determine the era and geographic origin (e.g. 19th Century Italian/Venetian Neoclassical, Mid-Century Modern American Studio Pottery, Victorian English, French Rococo).
 
 STEP 3: COMP IDENTIFICATION & TITLE OPTIMIZATION
-- Synthesize all identified physical traits, verified maker/region, pattern, and materials into high-velocity eBay search terms.
-- If live Google Search Grounding is active, cross-reference candidate artist names and motifs against auction records and eBay sold listings (e.g. '"Roger McAndrew" pottery vase', '"McAndrews" studio art pottery tree'). If a tentative reading like 'M. Andreas' returns zero comp listings, immediately pivot to the top visual and phonetic candidate ('Roger McAndrew').
+- Synthesize all identified physical traits, maker/region, pattern, and materials into high-velocity eBay search terms.
 - Construct the primary query for exact sold comps on eBay and Terapeak.
 
 STEP 4: RESALE PRICING & ARBITRAGE MATH
@@ -1280,44 +1130,25 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       // Direct multimodal vision call without billable tools (100% Free Tier compatible)
       for (const model of candidateModels) {
         try {
-          statusText.textContent = `Analyzing marks & live searching comps with ${model}...`;
+          statusText.textContent = `Analyzing marks & pattern with ${model}...`;
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
 
-          // Smart request: Attempt with Google Search Grounding for automated live comp & maker matching
-          let reqPayload = {
-            contents: [{
-              parts: [
-                { text: prompt },
-                ...imageParts
-              ]
-            }],
-            tools: [{ googleSearch: {} }],
-            generationConfig: {
-              temperature: 0.2,
-              responseMimeType: "application/json"
-            }
-          };
-
-          let resp = await fetch(url, {
+          const resp = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reqPayload)
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: prompt },
+                  ...imageParts
+                ]
+              }],
+              generationConfig: {
+                temperature: 0.2,
+                responseMimeType: "application/json"
+              }
+            })
           });
-
-          // Self-healing fallback: If Google Search Grounding is not active on this key (e.g. billing unlinked 429), fall back to pure vision
-          if (!resp.ok) {
-            const errClone = await resp.clone().json().catch(() => ({}));
-            const errMsg = errClone?.error?.message || '';
-            if (resp.status === 429 || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('tool') || errMsg.toLowerCase().includes('search')) {
-              console.log(`Search grounding requires Pay-as-you-go billing; running direct vision on ${model}...`);
-              delete reqPayload.tools;
-              resp = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reqPayload)
-              });
-            }
-          }
 
           if (!resp.ok) {
             const errBody = await resp.json().catch(() => ({}));
