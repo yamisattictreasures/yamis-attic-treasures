@@ -1,455 +1,9 @@
-
-Gemini
-New chat
-Library
-Images
-Scheduled
-Customize
-
-More
-New notebook
-Untitled notebook
-The 3-Point Check
-CHTGPT SITES TERMS
-All notebooks
-Filter folders...
-Search all chats...
-
-Conversation with Gemini
-"I am continuing work on Yami's Attic Treasures Sourcing Scout & Command Center (v4.0 Live).
-
-Web App: scout.html deployed on Cloudflare Pages / GitHub Pages (yamisattictreasures/yamis-attic-treasures).
-Google Drive: Master Folder ID 1kQWIjpb_UqxqmSAxezGrEwoj4kUY5wlX, Master Inventory Sheet 1-mI7b9aE30oDxsCeZ1jAvrMcYQgub44vQB6vWOgGcqE.
-Active Upgrades: Live Gemini 2.0/2.5 Search Grounding via linked Google Cloud billing, synchronous N-photo stitching for Google Lens backup, universal mark/signature detection (including the Roger McAndrew case study), and the 3x/2x buy target formula.
-Handoff Reference: yamis_attic_treasures_handoff_v4_master.md.
-Please review where we left off and let me know you're ready to proceed."
-[SEARCH: USED - Google Drive (yamis_attic_treasures_handoff_v4_master.md)]
-
-I have reviewed yamis_attic_treasures_handoff_v4_master.md and loaded all current architecture rules, forensic safeguards, and profit formulas for Yami's Attic Treasures Sourcing Scout & Command Center (v4.0 Live).
-
-Current System State Summary
-Live Deployment & Theme (scout.html):
-
-Hosted on your yamisattictreasures/yamis-attic-treasures GitHub repository (main branch) and deployed live via Cloudflare ([https://yamis-attic-treasures.yamiryk.workers.dev/scout.html](https://yamis-attic-treasures.yamiryk.workers.dev/scout.html)), keeping the public storefront (index.html) untouched.
-
-Runs the sunlit Faded Sage & Antique Parchment palette (#f4f7f2 sage, #fdfbf7 parchment, chiseled gold typography, and olive borders), replacing the legacy dark #171d18 background.
-
-Mobile Intake & N-Photo Stitching:
-
-Supports rear-camera capture (capture="environment") and multi-photo uploads with automatic client-side compression (1024px max, 80% JPEG).
-
-Synchronous N-photo stitching combines multi-angle shots (overall form + macro mark close-up) into a single clipboard image for 1-tap Google Lens visual matching, alongside direct Google Images, Terapeak (365-Day), and eBay Sold buttons.
-
-Forensic AI Vision & Live Search Grounding:
-
-Uses Gemini 2.0/2.5 Vision with live Google Search Grounding (via linked Google Cloud billing) for universal mark and signature decipherment across all antique/vintage categories.
-
-Roger McAndrew Protocol Active: Evaluates raised letters after "M" as Celtic prefixes (Mc/Mac) rather than initials (M.), checks stylized crossing W/A glyphs (McANDREWS vs. M. ANDREAS), correlates signature visual motifs (whimsical sgraffito bare tree, checkerboard band, unglazed black matte base), and pivots automatically if an OCR candidate returns zero live market matches.
-
-Enforces strict anti-hallucination rules: if an item cannot be verified, the system states "I do not know. I do not have enough information" rather than guessing.
-
-Grounded eBay Financial Engine (Buyer Pays Shipping Default):
-
-Gross Total: 
-Gross
-=
-P
-comp
-+
-S
-charged
-Gross=P 
-comp
-​
- +S 
-charged
-​
- 
-
-Taxable Base: 
-Gross
-×
-1.07
-Gross×1.07 (7% buyer sales tax buffer)
-
-eBay Final Value Fee: 
-(
-Taxable Base
-×
-13.25
-%
-)
-+
-F
-fixed
-(Taxable Base×13.25%)+F 
-fixed
-​
-  ($0.40 over $10, else $0.30)
-
-Net Payout: 
-Gross
-−
-eBay Fee
-−
-S
-actual shipping
-−
-M
-packaging materials
-Gross−eBay Fee−S 
-actual shipping
-​
- −M 
-packaging materials
-​
- 
-
-Buy Target Tiers:
-
-🟢 GOOD BUY (3x+ Return): 
-Max Buy
-=
-Net Payout
-/
-3.0
-Max Buy=Net Payout/3.0
-
-🟡 CONDITIONAL (2x–3x Return): 
-Max Buy
-=
-Net Payout
-/
-2.0
-Max Buy=Net Payout/2.0
-
-🔴 PASS (Under 2x Return): Asking price exceeds the 2x threshold
-
-Session Queue & Master Inventory Sync:
-
-Evaluates into localStorage and syncs bought items (22 data columns including comps, net profit/ROI, 80-character SEO title, item specifics, and comp URLs) directly to your Google Drive Master Inventory Sheet via the Google Apps Script doPost webhook.
-
-I am ready to proceed. Are we evaluating new sourcing finds today, refining code/features in scout.html, or working on your Master Inventory Sheet workflow?
-
-All
-Can you give me the link for the live site so we can check it?
-
-[SEARCH: USED - Google Drive (yamis_attic_treasures_handoff_v4_master.md)]
-
-Live Field Scout & Command Center (scout.html): https://yamis-attic-treasures.yamiryk.workers.dev/scout.html
-
-Public Buyer Storefront (index.html): https://yamis-attic-treasures.yamiryk.workers.dev/
-
-All
-[SEARCH: USED - Google Drive (scout_v4_raw_code.html)]
-
-The toast notification in your screenshot (⚠️ API Error: sendToGoogleDrive is not defined) happens because the scout.html code calls sendToGoogleDrive(...) and getCurrentItemPayload() whenever an item is evaluated with an asking price (or when clicking Mark as Bought / Sync to Google Drive), but the helper block defining those two functions was left out of the script section.   
-image_88057c.jpg
-
-Why It Triggered During Evaluation
-Inside displayQuickResult(data), right after the AI finishes analyzing your item, the code runs:
-
-JavaScript
-if (buy > 0 && state.settings.gdriveWebhook) {
-  sendToGoogleDrive([getCurrentItemPayload()], `"${scanItem.name}" auto-synced to Google Drive! ☁️`);
-}
-Because sendToGoogleDrive wasn't declared in the <script> tag, JavaScript threw a ReferenceError inside runGeminiVisionAnalysis, which caught it and displayed ⚠️ API Error: sendToGoogleDrive is not defined.   
-image_88057c.jpg
-
-How to Fix It in scout.html
-Open your GitHub repository (yamisattictreasures/yamis-attic-treasures) and edit scout.html.
-
-Scroll down to the QUEUE & GOOGLE DRIVE INTEGRATION section inside your <script> block (right above function renderQueue()).
-
-Paste the following block of code to define getCurrentItemPayload(), sendToGoogleDrive(), and wire up the Studio Sync to Google Drive and Add to Queue buttons:
-
-JavaScript
-    // Build full 22-column payload for Google Sheets Webhook
-    function getCurrentItemPayload() {
-      const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
-      const buy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
-      const shipCharged = parseFloat(document.getElementById('input-ship-charged').value) || 8.00;
-      const tier = document.getElementById('input-ship-tier').value || 'standard';
-
-      const feeRate = (state.settings.feeRate || 13.25) / 100;
-      const shipCost = (tier === 'fragile') ? state.settings.fragShip : state.settings.stdShip;
-      const packCost = (tier === 'fragile') ? state.settings.fragPack : state.settings.stdPack;
-      const totalShippingExpense = shipCost + packCost;
-
-      const gross = comp + shipCharged;
-      const taxableBase = gross * 1.07; // 7% buyer sales tax buffer
-      const ebayFee = (taxableBase * feeRate) + (gross > 10 ? 0.40 : 0.30);
-      const netPayout = Math.max(0, gross - ebayFee - totalShippingExpense);
-      const profit = netPayout - buy;
-      const roi = buy > 0 ? `${Math.round((profit / buy) * 100)}%` : '0%';
-      const target3x = Math.floor((netPayout / 3.0) * 2) / 2;
-      const target2x = Math.floor((netPayout / 2.0) * 2) / 2;
-
-      const name = document.getElementById('input-item-name').value || state.current.itemName || 'Vintage Sourced Item';
-      const q = encodeURIComponent(state.current.primaryQuery || name);
-
-      return {
-        dateAdded: new Date().toISOString().slice(0, 10),
-        name: name,
-        maker: document.getElementById('input-maker').value || state.current.maker || 'Unmarked',
-        confidence: document.getElementById('input-confidence').value || state.current.confidence || 'Verified',
-        comp: comp,
-        buy: buy,
-        gross: parseFloat(gross.toFixed(2)),
-        ebayFee: parseFloat(ebayFee.toFixed(2)),
-        netPayout: parseFloat(netPayout.toFixed(2)),
-        profit: parseFloat(profit.toFixed(2)),
-        roi: roi,
-        target3x: parseFloat(target3x.toFixed(2)),
-        target2x: parseFloat(target2x.toFixed(2)),
-        verdict: (document.getElementById('result-verdict-pill')?.textContent || 'Scouted').trim(),
-        seoTitle: document.getElementById('studio-title-input').value || name,
-        category: document.getElementById('spec-category').value || state.current.category || '',
-        era: document.getElementById('spec-era').value || state.current.era || '',
-        material: document.getElementById('spec-material').value || state.current.material || '',
-        dimensions: document.getElementById('spec-dimensions').value || state.current.dimensions || '',
-        condition: document.getElementById('studio-condition-desc').value || state.current.conditionDesc || '',
-        terapeakUrl: `https://www.ebay.com/sh/research?marketplace=EBAY-US&tabName=SOLD&dayRange=365&keywords=${q}`,
-        soldUrl: `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`
-      };
-    }
-
-    // Send item array to Google Apps Script Webhook
-    async function sendToGoogleDrive(itemsArray, successMsg) {
-      const webhookUrl = (state.settings.gdriveWebhook || '').trim();
-      if (!webhookUrl) {
-        showToast("Set Google Drive Webhook URL in Settings ⚙️", "⚠️");
-        return false;
-      }
-
-      try {
-        await fetch(webhookUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(itemsArray)
-        });
-        if (successMsg) showToast(successMsg, "☁️");
-        return true;
-      } catch (err) {
-        console.error("Google Drive Webhook Sync Error:", err);
-        showToast("Drive sync failed — check connection", "⚠️");
-        return false;
-      }
-    }
-
-    // Wire up Studio "Sync to Google Drive" & "Add to Queue" buttons
-    const syncDriveBtn = document.getElementById('btn-sync-gdrive');
-    if (syncDriveBtn) {
-      syncDriveBtn.addEventListener('click', () => {
-        const payload = getCurrentItemPayload();
-        sendToGoogleDrive([payload], `"${payload.name}" synced to Google Drive! ☁️`);
-      });
-    }
-
-    const saveQueueBtn = document.getElementById('btn-save-to-queue');
-    if (saveQueueBtn) {
-      saveQueueBtn.addEventListener('click', () => {
-        const payload = getCurrentItemPayload();
-        const item = {
-          id: Date.now(),
-          name: payload.name,
-          maker: payload.maker,
-          comp: payload.comp,
-          buy: payload.buy,
-          shipTier: document.getElementById('input-ship-tier').value || 'standard',
-          profit: payload.profit,
-          target3x: payload.target3x,
-          verdict: payload.verdict,
-          bought: payload.buy > 0,
-          dateAdded: payload.dateAdded,
-          data: { ...state.current }
-        };
-        state.queue.unshift(item);
-        try {
-          localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-        } catch (e) {}
-        renderQueue();
-        showToast(`"${payload.name}" saved to Queue! 📦`);
-        if (state.settings.gdriveAutosync) {
-          sendToGoogleDrive([payload], `"${payload.name}" auto-synced to Drive! ☁️`);
-        }
-      });
-    }
-Commit the change to your main branch in GitHub. Cloudflare will automatically rebuild and deploy within ~30 seconds, and your item evaluation will display the green/yellow/red decision card and sync cleanly to your sheet without throwing that error.
-
-Would you like me to generate the complete, updated single-file scout.html with this fix—plus the N-photo Google Lens stitching, live Search Grounding toggle, and Roger McAndrew safeguard—so you can do a clean 1-click select-all and paste into GitHub?
-
-All
-yes
-
-Sorry, something went wrong. Please try your request again.
-
-All
-When I paste them to GitHub, it just puts numbers 1 through 100 and 4. No text. And it gives me an error. Why?
-
-[SEARCH: NOT USED - memory only]
-
-That happens because of a conflict between how you copied the code and how GitHub's web editor handles line numbers and rich text. Plus, the snippet I gave you earlier was 104 lines of JavaScript meant to be inserted inside your existing file—if you replaced the whole scout.html file with just those 104 lines, the page would break.
-
-Why You Only Saw Numbers 1 Through 104 (No Text)
-You Pasted Into the Line-Number Gutter or Highlighted the Gutter: If you drag-select code manually, or if your cursor in GitHub isn't clicked firmly inside the right-hand text area, GitHub's CodeMirror editor sometimes only registers the 104 blank carriage returns (Enter keystrokes), creating lines 1 through 104 with zero text.
-
-Dark/Light Theme Invisible Text: Sometimes rich-text formatting copies white text onto a white background (or dark onto dark), making the lines look empty even though the characters are there.
-
-Partial Snippet vs. Complete File: That 104-line block was only the missing sendToGoogleDrive function—not the entire scout.html webpage. If you deleted everything in scout.html and pasted only those 104 lines, your HTML structure, banner, and buttons were wiped out, which immediately causes an error.
-
-How to Restore scout.html and Fix the Error in 60 Seconds
-Instead of trying to splice a 104-line snippet into the middle of the file, follow these exact steps so you don't lose any of your app:
-
-Step 1: Restore Your Full scout.html Code First
-Open your Clean Source Code Doc in Google Drive: View Raw scout.html Doc
-
-Press Ctrl + A (Windows) or Cmd + A (Mac) to select all, then Ctrl + C / Cmd + C to copy.
-
-Go to scout.html in GitHub, click the Edit (pencil) icon, click directly inside the main code box, press Ctrl + A to select the broken 104 lines, and press Backspace to clear it.
-
-Paste as Plain Text: Press Ctrl + Shift + V (Windows) or Cmd + Shift + V (Mac). This strips all invisible formatting and pastes your full ~900-line scout.html code cleanly.
-
-Step 2: Add the Missing sendToGoogleDrive Block at the Bottom
-While still editing scout.html in GitHub, scroll all the way to the very bottom of the file.
-
-Look for the last few lines right above </script>:
-
-JavaScript
-   // Initialize application
-   window.addEventListener('DOMContentLoaded', () => {
-Click on an empty line right above // Initialize application.
-
-Click the Copy button in the top-right corner of the code block below (do not highlight it with your mouse):
-
-JavaScript
-    function getCurrentItemPayload() {
-      const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
-      const buy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
-      const shipCharged = parseFloat(document.getElementById('input-ship-charged').value) || 8.00;
-      const tier = document.getElementById('input-ship-tier').value || 'standard';
-      const feeRate = (state.settings.feeRate || 13.25) / 100;
-      const shipCost = (tier === 'fragile') ? state.settings.fragShip : state.settings.stdShip;
-      const packCost = (tier === 'fragile') ? state.settings.fragPack : state.settings.stdPack;
-      const totalShippingExpense = shipCost + packCost;
-      const gross = comp + shipCharged;
-      const taxableBase = gross * 1.07;
-      const ebayFee = (taxableBase * feeRate) + (gross > 10 ? 0.40 : 0.30);
-      const netPayout = Math.max(0, gross - ebayFee - totalShippingExpense);
-      const profit = netPayout - buy;
-      const roi = buy > 0 ? `${Math.round((profit / buy) * 100)}%` : '0%';
-      const target3x = Math.floor((netPayout / 3.0) * 2) / 2;
-      const target2x = Math.floor((netPayout / 2.0) * 2) / 2;
-      const name = document.getElementById('input-item-name').value || state.current.itemName || 'Vintage Sourced Item';
-      const q = encodeURIComponent(state.current.primaryQuery || name);
-
-      return {
-        dateAdded: new Date().toISOString().slice(0, 10),
-        name: name,
-        maker: document.getElementById('input-maker').value || state.current.maker || 'Unmarked',
-        confidence: document.getElementById('input-confidence').value || state.current.confidence || 'Verified',
-        comp: comp,
-        buy: buy,
-        gross: parseFloat(gross.toFixed(2)),
-        ebayFee: parseFloat(ebayFee.toFixed(2)),
-        netPayout: parseFloat(netPayout.toFixed(2)),
-        profit: parseFloat(profit.toFixed(2)),
-        roi: roi,
-        target3x: parseFloat(target3x.toFixed(2)),
-        target2x: parseFloat(target2x.toFixed(2)),
-        verdict: (document.getElementById('result-verdict-pill')?.textContent || 'Scouted').trim(),
-        seoTitle: document.getElementById('studio-title-input').value || name,
-        category: document.getElementById('spec-category').value || state.current.category || '',
-        era: document.getElementById('spec-era').value || state.current.era || '',
-        material: document.getElementById('spec-material').value || state.current.material || '',
-        dimensions: document.getElementById('spec-dimensions').value || state.current.dimensions || '',
-        condition: document.getElementById('studio-condition-desc').value || state.current.conditionDesc || '',
-        terapeakUrl: `https://www.ebay.com/sh/research?marketplace=EBAY-US&tabName=SOLD&dayRange=365&keywords=${q}`,
-        soldUrl: `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`
-      };
-    }
-
-    async function sendToGoogleDrive(itemsArray, successMsg) {
-      const webhookUrl = (state.settings.gdriveWebhook || '').trim();
-      if (!webhookUrl) {
-        showToast("Set Google Drive Webhook URL in Settings ⚙️", "⚠️");
-        return false;
-      }
-      try {
-        await fetch(webhookUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(itemsArray)
-        });
-        if (successMsg) showToast(successMsg, "☁️");
-        return true;
-      } catch (err) {
-        console.error("Google Drive Webhook Sync Error:", err);
-        showToast("Drive sync failed — check connection", "⚠️");
-        return false;
-      }
-    }
-
-    const syncDriveBtn = document.getElementById('btn-sync-gdrive');
-    if (syncDriveBtn) {
-      syncDriveBtn.addEventListener('click', () => {
-        const payload = getCurrentItemPayload();
-        sendToGoogleDrive([payload], `"${payload.name}" synced to Google Drive! ☁️`);
-      });
-    }
-
-    const saveQueueBtn = document.getElementById('btn-save-to-queue');
-    if (saveQueueBtn) {
-      saveQueueBtn.addEventListener('click', () => {
-        const payload = getCurrentItemPayload();
-        const item = {
-          id: Date.now(),
-          name: payload.name,
-          maker: payload.maker,
-          comp: payload.comp,
-          buy: payload.buy,
-          shipTier: document.getElementById('input-ship-tier').value || 'standard',
-          profit: payload.profit,
-          target3x: payload.target3x,
-          verdict: payload.verdict,
-          bought: payload.buy > 0,
-          dateAdded: payload.dateAdded,
-          data: { ...state.current }
-        };
-        state.queue.unshift(item);
-        try { localStorage.setItem('yami_queue', JSON.stringify(state.queue)); } catch (e) {}
-        renderQueue();
-        showToast(`"${payload.name}" saved to Queue! 📦`);
-        if (state.settings.gdriveAutosync) {
-          sendToGoogleDrive([payload], `"${payload.name}" auto-synced to Drive! ☁️`);
-        }
-      });
-    }
-Press Ctrl + Shift + V (or Cmd + Shift + V) to paste it as plain text right above // Initialize application.
-
-Click Commit changes... in the top right of GitHub.
-
-Want a Downloadable scout.html File Instead?
-If GitHub's text editor is still giving you trouble with copy-pasting, tell me "Generate downloadable scout.html file" (or "Update my Google Doc with the fixed code") and I can create a ready-to-upload file so you never have to copy and paste code manually again!
-
-All
-yes
-
-You stopped this response
-gve downloadable file with all chages needed
-
-Your HTML file is ready
-
-HTML icon
-scout
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yami's Attic Treasures — Sourcing Scout v4.0 Live</title>
+  <title>Yami's Attic Treasures — Sourcing Scout v4.2 Pro</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -546,7 +100,6 @@ scout
   
   <!-- Top Hero Header: Official Approved Store Banner in Faded Sage Attic -->
   <header class="border-b-2 border-[#8fad8c] bg-[#eef4ed] shadow-md relative">
-    <!-- Banner Container -->
     <div class="max-w-7xl mx-auto px-2 sm:px-4 pt-2 pb-1">
       <div class="relative w-full overflow-hidden rounded-xl border-2 border-[#8fad8c]/50 shadow-md bg-[#1f2c20] py-5 px-6 text-center">
         <p class="text-[11px] sm:text-xs font-mono tracking-[0.25em] uppercase text-[#b5ccb1] mb-1">Port St. Lucie, FL • Est. 2011</p>
@@ -557,19 +110,16 @@ scout
   
     <!-- Navigation & Status Bar -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
-      <!-- Brand & Version Indicator -->
       <div class="flex items-center gap-2.5">
         <h1 class="font-brand font-bold text-base sm:text-lg text-[#2c3d2a] tracking-wider uppercase">
           Sourcing Scout &amp; Command Center
         </h1>
         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#222e23] text-[#d3e2d0] border border-[#587654] font-mono shadow-inner">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#8fad8c] animate-pulse"></span>v4.0 Live
+          <span class="w-1.5 h-1.5 rounded-full bg-[#8fad8c] animate-pulse"></span>v4.2 High-Res OCR
         </span>
       </div>
   
-      <!-- Quick Actions & Tabs -->
       <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-        <!-- Navigation Tabs -->
         <nav class="flex items-center bg-[#172118] p-1 rounded-xl border border-[#587654]/60 text-xs sm:text-sm shadow-inner">
           <button id="tab-scout-btn" class="px-3 sm:px-4 py-1.5 rounded-lg font-bold transition bg-gradient-to-r from-[#c59b27] via-[#e2be58] to-[#c59b27] text-[#1c140c] shadow">
             ⚡ Sourcing Scout
@@ -593,6 +143,37 @@ scout
     <span id="toast-icon">✅</span>
     <span id="toast-msg" class="text-sm font-semibold">Notification message</span>
   </div>
+
+  <!-- 1-Tap Macro Mark Crop Modal -->
+  <div id="crop-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
+    <div class="bg-[#fdfbf7] border-2 border-[#8fad8c] rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[#d3e2d0] pb-2.5">
+        <div>
+          <h3 class="font-brand font-bold text-base sm:text-lg text-[#2c2016]">🔍 Macro Mark &amp; Signature Zoom</h3>
+          <p class="text-xs text-[#587654]">Drag across the signature, hallmark, or backstamp to attach a high-res close-up.</p>
+        </div>
+        <button type="button" id="btn-close-crop" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold border border-rose-200">
+          ✕ Close
+        </button>
+      </div>
+
+      <div class="relative bg-[#172118] rounded-xl overflow-hidden flex items-center justify-center max-h-[60vh] select-none">
+        <canvas id="crop-canvas" class="max-w-full max-h-[58vh] cursor-crosshair touch-none"></canvas>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+        <span id="crop-hint-text" class="text-xs text-[#587654] font-medium">Tip: Drag a tight box around the maker's mark, then tap Add Macro Crop.</span>
+        <div class="flex items-center gap-2 ml-auto">
+          <button type="button" id="btn-reset-crop-box" class="px-3 py-2 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] rounded-xl text-xs font-bold">
+            Reset Box
+          </button>
+          <button type="button" id="btn-apply-crop" class="px-4 py-2 bg-gradient-to-r from-[#b8860b] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-xs rounded-xl shadow">
+            ✅ Add Macro Crop to Tray
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
   
   <!-- Main Content Layout -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
@@ -602,24 +183,20 @@ scout
     <!-- ========================================== -->
     <section id="tab-scout" class="space-y-6">
   
-      <!-- Streamlined Mobile-First Intake Card (Sunlit Faded Sage & Parchment) -->
       <div class="p-5 sm:p-7 rounded-2xl bg-[#fdfbf7] border-2 border-[#b5ccb1] shadow-2xl space-y-5">
         
         <!-- Action Buttons: Snap & Upload -->
         <div class="flex flex-wrap items-center gap-3">
-          <!-- Snap Camera Button (Direct Camera Trigger on mobile) -->
           <button id="btn-camera-snap" class="flex-1 sm:flex-none px-6 py-3.5 bg-gradient-to-r from-[#b8860b] via-[#c59b27] to-[#e2be58] hover:from-[#a07409] hover:to-[#c59b27] text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2.5">
             <span class="text-xl">📸</span>
             <span>Snap a Photo</span>
           </button>
   
-          <!-- Upload Multiple Photos Button (Faded Sage Pill) -->
           <button id="btn-photo-upload" class="flex-1 sm:flex-none px-5 py-3.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border-2 border-[#8fad8c] font-bold text-sm sm:text-base rounded-xl shadow-md active:scale-95 transition flex items-center justify-center gap-2">
             <span class="text-lg">🖼️</span>
             <span>Upload Photos</span>
           </button>
   
-          <!-- Hidden Native Inputs -->
           <input type="file" id="camera-snap-input" accept="image/*" capture="environment" class="hidden">
           <input type="file" id="photo-upload-input" accept="image/*" multiple class="hidden">
   
@@ -632,16 +209,19 @@ scout
         <div id="photo-tray-container" class="rounded-xl border-2 border-dashed border-[#8fad8c]/70 bg-[#f4f8f3] p-3 transition">
           <div id="photo-empty-state" class="text-center py-4 text-xs sm:text-sm text-[#465e43]">
             <p class="font-medium">Point your camera at maker marks, signatures, and full piece.</p>
-            <p class="text-[11px] text-[#72926d] mt-0.5">Multi-photo stitching automatically combines angles for Google Lens &amp; Gemini Vision.</p>
+            <p class="text-[11px] text-[#72926d] mt-0.5">2048px High-Res Capture + High-Token OCR • Tap 🔍 on any photo to crop a small mark.</p>
           </div>
   
           <div id="photo-tray" class="hidden flex flex-wrap items-center gap-3">
             <!-- Dynamic thumbnails injected here -->
           </div>
   
-          <div id="photo-count-bar" class="hidden mt-2 pt-2 border-t border-[#d3e2d0] flex items-center justify-between text-xs text-[#587654]">
+          <div id="photo-count-bar" class="hidden mt-2 pt-2 border-t border-[#d3e2d0] flex flex-wrap items-center justify-between gap-2 text-xs text-[#587654]">
             <span id="photo-count-text" class="font-semibold text-[#2c3d2a]">0 photos attached</span>
             <div class="flex items-center gap-2">
+              <button type="button" onclick="openCropModal(0)" class="px-2.5 py-1 bg-[#fdfbf7] hover:bg-[#e8f0e6] border border-[#c59b27] text-[#6d510e] rounded-md text-[11px] font-bold flex items-center gap-1 transition shadow-sm">
+                🔍 Crop Mark
+              </button>
               <button type="button" onclick="openGoogleLens()" class="px-2.5 py-1 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-md text-[11px] font-semibold flex items-center gap-1 transition shadow-sm">
                 🌐 Visual Match (Lens)
               </button>
@@ -652,20 +232,24 @@ scout
           </div>
         </div>
   
-        <!-- Clean, Empty Notes / Asking Price Input -->
+        <!-- Notes / Asking Price Input -->
         <div class="space-y-1.5">
           <label for="scout-notes-input" class="block text-xs font-bold text-[#587654] uppercase tracking-wider">
             Notes / Asking Price (Optional)
           </label>
-          <textarea id="scout-notes-input" rows="2" class="w-full bg-[#f8faf7] border-2 border-[#b5ccb1] rounded-xl p-3 text-xs sm:text-sm text-[#2b2219] placeholder-[#72926d]/60 font-sans focus:outline-none focus:border-[#587654] focus:ring-1 focus:ring-[#587654] transition custom-scroll" placeholder="e.g. Asking $15 at estate sale, marked on bottom in script..."></textarea>
+          <textarea id="scout-notes-input" rows="2" class="w-full bg-[#f8faf7] border-2 border-[#b5ccb1] rounded-xl p-3 text-xs sm:text-sm text-[#2b2219] placeholder-[#72926d]/60 font-sans focus:outline-none focus:border-[#587654] focus:ring-1 focus:ring-[#587654] transition custom-scroll" placeholder="e.g. Asking $15 at estate sale, incised mark on underside..."></textarea>
         </div>
   
-        <!-- Evaluate / Send Button -->
-        <div class="flex items-center justify-between pt-1">
-          <div class="text-[11px] text-[#587654]">
+        <!-- Evaluate / Scan Mode Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div class="flex flex-wrap items-center gap-3 text-[11px] text-[#587654]">
             <span id="gemini-key-status" class="inline-flex items-center gap-1 font-medium">
               <span class="w-2 h-2 rounded-full bg-[#587654]"></span> Gemini AI Vision Ready
             </span>
+            <select id="scan-precision-mode" class="bg-[#edf4eb] border border-[#8fad8c] text-[#2c3d2a] font-bold rounded-lg px-2.5 py-1 text-[11px] focus:outline-none">
+              <option value="forensic">🔬 Forensic Deep OCR (Pro First)</option>
+              <option value="fast">⚡ Fast Field Scan (Flash First)</option>
+            </select>
           </div>
   
           <button id="btn-evaluate" class="px-7 py-3 bg-gradient-to-r from-[#b8860b] via-[#c59b27] to-[#e2be58] hover:from-[#a07409] hover:to-[#c59b27] text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-xl transition flex items-center gap-2">
@@ -674,14 +258,14 @@ scout
           </button>
         </div>
   
-        <!-- Researching Status Bar (Animated spinner while AI works) -->
+        <!-- Researching Status Bar -->
         <div id="eval-status-box" class="hidden p-3.5 rounded-xl bg-[#edf4eb] border border-[#8fad8c]/60 flex items-center gap-3">
           <svg class="animate-spin h-5 w-5 text-[#587654]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
           <span id="eval-status-text" class="text-xs sm:text-sm font-semibold text-[#2c3d2a]">
-            Researching maker marks, pattern &amp; live eBay comps...
+            Inspecting high-res marks, testing glyph permutations &amp; verifying live comps...
           </span>
         </div>
       </div>
@@ -693,7 +277,7 @@ scout
         
         <!-- Big Verdict Header -->
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#d3e2d0] pb-4">
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-2.5">
             <span id="result-verdict-pill" class="px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#e8f0e6] text-[#2c3d2a] border-2 border-[#587654] shadow-sm">
               🟢 GOOD BUY
             </span>
@@ -712,21 +296,24 @@ scout
         <div class="p-4 rounded-xl bg-gradient-to-r from-[#f0f5ee] to-[#f8f6ee] border-l-4 border-[#587654] space-y-1">
           <p class="text-xs font-bold uppercase tracking-wider text-[#587654]">Sourcing Verdict &amp; Rule</p>
           <h3 id="result-rule-text" class="text-base sm:text-lg font-extrabold text-[#172118]">
-            Buy if under $15.00 for 3x return. Comps average $48.00.
+            Pay up to $0.00 for 3x return.
           </h3>
         </div>
   
         <!-- Identified Item Name & Maker -->
-        <div class="space-y-1">
+        <div class="space-y-1.5">
           <h2 id="result-item-name" class="font-brand font-bold text-xl sm:text-2xl text-[#2c2016]">
             Item Name
           </h2>
           <p id="result-maker-text" class="text-xs sm:text-sm text-[#587654]">
             Maker: <span class="font-semibold text-[#2c2016]" id="result-maker-val">—</span> • Era: <span class="font-semibold text-[#2c2016]" id="result-era-val">—</span>
           </p>
+          <p id="result-mark-summary" class="text-xs text-[#465e43] bg-[#f4f8f3] border border-[#d3e2d0] rounded-lg px-3 py-2">
+            <strong>Mark Reading:</strong> <span id="result-mark-reading-val">—</span>
+          </p>
         </div>
   
-        <!-- Key Financial Snapshot (3 Compact Cards) -->
+        <!-- Key Financial Snapshot -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
           <div class="p-3.5 rounded-xl bg-[#f8faf7] border border-[#d3e2d0] text-center">
             <span class="block text-[11px] font-sans text-[#587654] uppercase tracking-wide">3x Net Buy Limit</span>
@@ -742,26 +329,23 @@ scout
           </div>
         </div>
   
-        <!-- Primary Action Buttons: Mark Bought (Auto-Sync), See Details, Snap Next -->
+        <!-- Primary Action Buttons -->
         <div class="flex flex-wrap items-center gap-3 pt-2">
-          <!-- Button to Mark as Bought & Auto-Sync to Google Drive -->
           <button id="btn-quick-bought" class="flex-1 sm:flex-none px-6 py-3.5 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
             <span id="bought-btn-icon">✅</span>
             <span id="bought-btn-label">Mark as Bought</span>
           </button>
   
-          <!-- Button to See Details (Goes to Listing Studio) -->
           <button id="btn-see-details" class="flex-1 sm:flex-none px-5 py-3.5 bg-gradient-to-r from-[#c59b27] via-[#e2be58] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
-            <span>See Full Details</span>
+            <span>See Full Details &amp; Audit</span>
             <span>➔</span>
           </button>
   
-          <!-- Button to Snap Next Item (Clears intake) -->
           <button id="btn-snap-next" class="flex-1 sm:flex-none px-4 py-3.5 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] font-bold text-sm sm:text-base rounded-xl shadow-md active:scale-95 transition flex items-center justify-center gap-2">
             <span>📸 Snap Next</span>
           </button>
   
-          <!-- Live Comps Links on Quick Card -->
+          <!-- Live Comps Links -->
           <div class="flex flex-wrap items-center gap-2 ml-auto w-full sm:w-auto justify-end pt-2 sm:pt-0">
             <button type="button" id="btn-quick-lens" onclick="openGoogleLens()" class="px-3 py-2 bg-[#f4f8f3] hover:bg-[#e8f0e6] border border-[#b5ccb1] text-[#465e43] rounded-lg text-xs font-semibold flex items-center gap-1 transition shadow-sm">
               🌐 Google Lens
@@ -785,7 +369,6 @@ scout
     <!-- ========================================== -->
     <section id="tab-studio" class="hidden space-y-6">
   
-      <!-- Back to Scout Bar -->
       <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-[#fdfbf7] border border-[#b5ccb1] shadow-md">
         <button id="btn-back-to-scout" class="px-4 py-2 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] font-bold text-xs sm:text-sm rounded-lg border border-[#8fad8c] flex items-center gap-2 transition">
           <span>⬅️</span> Back to Sourcing Scout
@@ -801,7 +384,6 @@ scout
         </div>
       </div>
   
-      <!-- Main Studio 2-Column Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
   
         <!-- Left Column: Financial Audit & Margin Breakdown (5 cols) -->
@@ -815,17 +397,15 @@ scout
           </div>
   
           <div class="space-y-4">
-            <!-- Item Name Input -->
             <div class="space-y-1">
               <label class="block text-xs font-bold text-[#587654] uppercase">Item Name / Working Title</label>
-              <input type="text" id="input-item-name" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-semibold text-[#2c2016] focus:outline-none focus:border-[#587654]" placeholder="Fenton Cranberry Hobnail Glass Bowl">
+              <input type="text" id="input-item-name" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-semibold text-[#2c2016] focus:outline-none focus:border-[#587654]" placeholder="Item title">
             </div>
   
-            <!-- Maker & Confidence -->
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
                 <label class="block text-xs font-bold text-[#587654] uppercase">Maker / Artist</label>
-                <input type="text" id="input-maker" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-semibold text-[#2c2016]" placeholder="Fenton">
+                <input type="text" id="input-maker" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-semibold text-[#2c2016]" placeholder="Maker">
               </div>
               <div class="space-y-1">
                 <label class="block text-xs font-bold text-[#587654] uppercase">Attribution</label>
@@ -838,7 +418,6 @@ scout
               </div>
             </div>
   
-            <!-- Price Inputs (Sold Comp & Purchase Cost) -->
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
                 <label class="block text-xs font-bold text-[#587654] uppercase">Sold Comps Avg ($)</label>
@@ -856,7 +435,6 @@ scout
               </div>
             </div>
   
-            <!-- Shipping Tier & Allowance -->
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
                 <label class="block text-xs font-bold text-[#587654] uppercase">Shipping Tier</label>
@@ -874,7 +452,6 @@ scout
               </div>
             </div>
   
-            <!-- Detailed Fee Breakdown Table -->
             <div class="p-4 rounded-xl bg-[#f4f8f3] border border-[#d3e2d0] space-y-2 text-xs font-mono">
               <div class="flex justify-between text-[#587654]">
                 <span>Gross Buyer Total (Comp + Ship):</span>
@@ -898,7 +475,6 @@ scout
               </div>
             </div>
   
-            <!-- Target Buy Limits (3x and 2x rules based on Net Payout) -->
             <div class="grid grid-cols-2 gap-3 pt-1">
               <div class="p-3 bg-[#fdfbf7] border-2 border-[#b8860b] rounded-xl text-center">
                 <span class="block text-[11px] font-bold text-[#b8860b] uppercase">3x Thrift Target</span>
@@ -914,14 +490,32 @@ scout
           </div>
         </div>
   
-        <!-- Right Column: SEO Listing Studio & Descriptions (7 cols) -->
+        <!-- Right Column: SEO Listing Studio & Forensic Audit (7 cols) -->
         <div class="lg:col-span-7 space-y-5 bg-[#fdfbf7] p-5 sm:p-6 rounded-2xl border-2 border-[#b5ccb1] shadow-xl">
           <div class="border-b border-[#d3e2d0] pb-3 flex items-center justify-between">
             <h3 class="font-brand font-bold text-base text-[#2c2016] flex items-center gap-2">
               <span>📝</span>
-              <span>eBay SEO Listing Studio</span>
+              <span>eBay SEO Listing Studio &amp; Forensic Audit</span>
             </h3>
             <span class="text-xs text-[#587654] font-mono">1-Click Copy Ready</span>
+          </div>
+
+          <!-- Live Search Grounding & Mark Permutations Audit Box -->
+          <div id="grounding-audit-box" class="p-3.5 rounded-xl bg-[#f4f8f3] border border-[#8fad8c] space-y-2 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-[#2c3d2a] uppercase tracking-wider">🔬 Forensic OCR &amp; Live Search Grounding Audit</span>
+              <span id="audit-model-badge" class="font-mono text-[11px] px-2 py-0.5 rounded bg-[#e8f0e6] text-[#2c3d2a] border border-[#b5ccb1]">—</span>
+            </div>
+            <div class="text-[#2c2016]">
+              <strong>Mark Permutations Tested:</strong> <span id="audit-permutations-val" class="font-mono text-[#465e43]">None yet</span>
+            </div>
+            <div class="text-[#2c2016]">
+              <strong>Live Google Search Queries:</strong> <span id="audit-queries-val" class="font-mono text-[#465e43]">None yet</span>
+            </div>
+            <div id="audit-sources-container" class="hidden pt-1 border-t border-[#d3e2d0]">
+              <strong class="block text-[#2c3d2a] mb-1">Grounded Web Sources:</strong>
+              <ul id="audit-sources-list" class="list-disc list-inside space-y-0.5 text-[11px] text-[#465e43]"></ul>
+            </div>
           </div>
   
           <!-- 80-Char SEO Title -->
@@ -931,7 +525,7 @@ scout
               <span id="title-char-count" class="font-mono font-bold text-[#2e5229]">0 / 80</span>
             </div>
             <div class="flex gap-2">
-              <input type="text" id="studio-title-input" maxlength="80" class="flex-1 bg-[#f8faf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-semibold text-[#2c2016]" placeholder="Vintage Fenton Cranberry Opalescent Hobnail Ruffled Art Glass Bowl 8 in">
+              <input type="text" id="studio-title-input" maxlength="80" class="flex-1 bg-[#f8faf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-semibold text-[#2c2016]" placeholder="Optimized 80-character eBay title">
               <button id="btn-copy-title" class="px-3 py-2 bg-[#edf4eb] hover:bg-[#e0ece0] border border-[#8fad8c] text-[#2c3d2a] text-xs font-bold rounded-xl transition">
                 Copy
               </button>
@@ -946,7 +540,7 @@ scout
             </div>
             <div class="space-y-1">
               <label class="block font-semibold text-[#587654]">Type</label>
-              <input type="text" id="spec-type" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-lg p-1.5 text-xs text-[#2c2016]" placeholder="Bowl">
+              <input type="text" id="spec-type" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-lg p-1.5 text-xs text-[#2c2016]" placeholder="Collectible">
             </div>
             <div class="space-y-1">
               <label class="block font-semibold text-[#587654]">Era</label>
@@ -954,18 +548,18 @@ scout
             </div>
             <div class="space-y-1">
               <label class="block font-semibold text-[#587654]">Material</label>
-              <input type="text" id="spec-material" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-lg p-1.5 text-xs text-[#2c2016]" placeholder="Art Glass">
+              <input type="text" id="spec-material" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-lg p-1.5 text-xs text-[#2c2016]" placeholder="Ceramic / Glass">
             </div>
           </div>
   
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
             <div class="space-y-1">
               <label class="block font-semibold text-[#587654]">Dimensions</label>
-              <input type="text" id="spec-dimensions" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-lg p-1.5 text-xs text-[#2c2016]" placeholder="4.5 in H x 8 in W">
+              <input type="text" id="spec-dimensions" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-lg p-1.5 text-xs text-[#2c2016]" placeholder="See photos">
             </div>
             <div class="space-y-1">
               <label class="block font-semibold text-[#587654]">eBay Category</label>
-              <input type="text" id="spec-category" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-lg p-1.5 text-xs text-[#2c2016]" placeholder="Pottery &amp; Glass &gt; Decorative Cookware, Dinnerware &amp; Serveware &gt; Bowls">
+              <input type="text" id="spec-category" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-lg p-1.5 text-xs text-[#2c2016]" placeholder="eBay Category">
             </div>
           </div>
   
@@ -996,7 +590,6 @@ scout
             </div>
   
             <div id="html-rendered-preview" class="p-3 bg-[#f8faf7] border border-[#b5ccb1] rounded-xl max-h-48 overflow-y-auto text-xs custom-scroll">
-              <!-- Rendered template preview -->
             </div>
             <textarea id="html-raw-code" rows="5" class="hidden w-full bg-[#172118] border border-[#8fad8c] rounded-xl p-3 text-xs text-[#d3e2d0] font-mono custom-scroll"></textarea>
           </div>
@@ -1032,7 +625,6 @@ scout
           </div>
         </div>
   
-        <!-- Session Overview Stats -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono pt-1">
           <div class="p-3 bg-[#f8faf7] border border-[#d3e2d0] rounded-xl flex items-center justify-between">
             <span class="text-xs font-sans text-[#587654]">Total Scanned:</span>
@@ -1062,7 +654,6 @@ scout
               </tr>
             </thead>
             <tbody id="queue-table-body" class="divide-y divide-[#d3e2d0]">
-              <!-- Dynamic rows -->
             </tbody>
           </table>
           <p id="queue-empty-msg" class="text-center py-8 text-xs text-[#587654] font-medium">
@@ -1081,19 +672,19 @@ scout
           <h3 class="font-brand font-bold text-lg text-[#2c2016] flex items-center gap-2">
             <span>⚙️</span> System Settings &amp; Integrations
           </h3>
-          <p class="text-xs text-[#587654]">Configure your Google Gemini API key, Live Search Grounding, and Google Drive Sheet webhook.</p>
+          <p class="text-xs text-[#587654]">Configure your Google Gemini API key, High-Res Vision OCR, Search Grounding, and Google Drive Sheet webhook.</p>
         </div>
   
         <!-- Gemini API Key Setup -->
         <div class="p-4 rounded-xl bg-[#f4f8f3] border border-[#8fad8c] space-y-3">
           <div class="flex items-center justify-between">
             <label class="block text-xs font-bold text-[#2c2016] uppercase tracking-wider">
-              Google Gemini API Key (Multimodal Vision + Search Grounding)
+              Google Gemini API Key (High-Res Vision + Search Grounding)
             </label>
             <span class="text-[11px] text-[#587654]">Stored locally on your device</span>
           </div>
           <p class="text-xs text-[#587654]">
-            Manage your key in <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline text-[#b8860b] font-semibold">Google AI Studio</a>. Linked Google Cloud billing enables live Google Search Grounding for real-time maker and comp verification.
+            Manage your key in <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline text-[#b8860b] font-semibold">Google AI Studio</a>. Linked Google Cloud billing enables live Google Search Grounding for real-time maker and sold comp verification.
           </p>
           <div class="flex gap-2">
             <input type="password" id="set-gemini-key" class="flex-1 bg-[#fdfbf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-mono text-[#2c2016] focus:outline-none focus:border-[#587654]" placeholder="Paste AIzaSy... key here">
@@ -1104,11 +695,19 @@ scout
               Save Key
             </button>
           </div>
-          <div class="flex items-center gap-2 pt-1">
-            <input type="checkbox" id="set-search-grounding" checked class="w-4 h-4 rounded text-[#587654] bg-[#f8faf7] border-[#b5ccb1]">
-            <label for="set-search-grounding" class="text-xs text-[#2c3d2a] font-semibold cursor-pointer">
-              Enable Live Google Search Grounding (auto-falls back to standard Vision if rate-limited)
-            </label>
+          <div class="space-y-1.5 pt-1">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="set-search-grounding" checked class="w-4 h-4 rounded text-[#587654] bg-[#f8faf7] border-[#b5ccb1]">
+              <label for="set-search-grounding" class="text-xs text-[#2c3d2a] font-semibold cursor-pointer">
+                Enable Live Google Search Grounding (verifies marks &amp; live sold comps on the web)
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="set-high-res-vision" checked class="w-4 h-4 rounded text-[#587654] bg-[#f8faf7] border-[#b5ccb1]">
+              <label for="set-high-res-vision" class="text-xs text-[#2c3d2a] font-semibold cursor-pointer">
+                Enable High-Density Vision Tokens (MEDIA_RESOLUTION_HIGH for small marks/cursive)
+              </label>
+            </div>
           </div>
         </div>
   
@@ -1170,6 +769,8 @@ scout
         itemName: "",
         maker: "",
         confidence: "Verified",
+        markTranscription: "",
+        alternateReadings: [],
         diagNotes: "",
         primaryQuery: "",
         compPrice: 0.00,
@@ -1182,12 +783,17 @@ scout
         pattern: "",
         dimensions: "",
         visualDesc: "",
-        conditionDesc: ""
+        conditionDesc: "",
+        _searchGrounded: false,
+        _modelUsed: "",
+        _searchQueries: [],
+        _groundingSources: []
       },
       queue: [],
       settings: {
         geminiKey: localStorage.getItem('yamis_gemini_api_key') || '',
         searchGrounding: true,
+        highResVision: true,
         feeRate: 13.25,
         stdShip: 8.00,
         stdPack: 1.00,
@@ -1199,7 +805,6 @@ scout
       }
     };
   
-    // Load persisted settings & queue
     try {
       const savedQueue = localStorage.getItem('yami_queue');
       if (savedQueue) state.queue = JSON.parse(savedQueue);
@@ -1263,8 +868,8 @@ scout
 
       const cols = Math.min(validImgs.length, 2);
       const rows = Math.ceil(validImgs.length / cols);
-      const cellSize = 640;
-      const padding = 12;
+      const cellSize = 800;
+      const padding = 14;
       const canvas = document.createElement('canvas');
       canvas.width = cols * cellSize + (cols + 1) * padding;
       canvas.height = rows * cellSize + (rows + 1) * padding;
@@ -1337,11 +942,162 @@ scout
       document.execCommand('copy');
       document.body.removeChild(ta);
     }
+
+    // ==========================================
+    // 1-TAP MACRO MARK & SIGNATURE CROP MODAL
+    // ==========================================
+    let cropState = {
+      photoIdx: 0,
+      img: null,
+      isDragging: false,
+      startX: 0,
+      startY: 0,
+      rect: null
+    };
+
+    window.openCropModal = function(idx) {
+      if (!state.photos || state.photos.length === 0) return;
+      const safeIdx = (idx >= 0 && idx < state.photos.length) ? idx : 0;
+      cropState.photoIdx = safeIdx;
+      cropState.rect = null;
+
+      const modal = document.getElementById('crop-modal');
+      const canvas = document.getElementById('crop-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const img = new Image();
+      img.onload = () => {
+        cropState.img = img;
+        const maxDisplayW = Math.min(window.innerWidth - 64, 620);
+        const maxDisplayH = Math.min(window.innerHeight * 0.55, 460);
+        const scale = Math.min(maxDisplayW / img.width, maxDisplayH / img.height, 1);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        drawCropCanvas();
+        modal.classList.remove('hidden');
+      };
+      img.src = state.photos[safeIdx].dataUrl;
+    };
+
+    function drawCropCanvas() {
+      const canvas = document.getElementById('crop-canvas');
+      const ctx = canvas.getContext('2d');
+      if (!cropState.img) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(cropState.img, 0, 0, canvas.width, canvas.height);
+
+      if (cropState.rect && cropState.rect.w > 8 && cropState.rect.h > 8) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(
+          cropState.img,
+          (cropState.rect.x / canvas.width) * cropState.img.width,
+          (cropState.rect.y / canvas.height) * cropState.img.height,
+          (cropState.rect.w / canvas.width) * cropState.img.width,
+          (cropState.rect.h / canvas.height) * cropState.img.height,
+          cropState.rect.x,
+          cropState.rect.y,
+          cropState.rect.w,
+          cropState.rect.h
+        );
+        ctx.strokeStyle = '#e2be58';
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(cropState.rect.x, cropState.rect.y, cropState.rect.w, cropState.rect.h);
+      }
+    }
+
+    function getCanvasCoords(e) {
+      const canvas = document.getElementById('crop-canvas');
+      const bounds = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: Math.max(0, Math.min(canvas.width, ((clientX - bounds.left) / bounds.width) * canvas.width)),
+        y: Math.max(0, Math.min(canvas.height, ((clientY - bounds.top) / bounds.height) * canvas.height))
+      };
+    }
+
+    const cropCanvasEl = document.getElementById('crop-canvas');
+    ['mousedown', 'touchstart'].forEach(evt => {
+      cropCanvasEl.addEventListener(evt, (e) => {
+        e.preventDefault();
+        const pt = getCanvasCoords(e);
+        cropState.isDragging = true;
+        cropState.startX = pt.x;
+        cropState.startY = pt.y;
+        cropState.rect = { x: pt.x, y: pt.y, w: 0, h: 0 };
+      }, { passive: false });
+    });
+
+    ['mousemove', 'touchmove'].forEach(evt => {
+      cropCanvasEl.addEventListener(evt, (e) => {
+        if (!cropState.isDragging) return;
+        e.preventDefault();
+        const pt = getCanvasCoords(e);
+        cropState.rect = {
+          x: Math.min(cropState.startX, pt.x),
+          y: Math.min(cropState.startY, pt.y),
+          w: Math.abs(pt.x - cropState.startX),
+          h: Math.abs(pt.y - cropState.startY)
+        };
+        drawCropCanvas();
+      }, { passive: false });
+    });
+
+    ['mouseup', 'touchend'].forEach(evt => {
+      cropCanvasEl.addEventListener(evt, () => {
+        cropState.isDragging = false;
+      });
+    });
+
+    document.getElementById('btn-close-crop').addEventListener('click', () => {
+      document.getElementById('crop-modal').classList.add('hidden');
+    });
+
+    document.getElementById('btn-reset-crop-box').addEventListener('click', () => {
+      cropState.rect = null;
+      drawCropCanvas();
+    });
+
+    document.getElementById('btn-apply-crop').addEventListener('click', () => {
+      const canvas = document.getElementById('crop-canvas');
+      if (!cropState.img || !cropState.rect || cropState.rect.w < 12 || cropState.rect.h < 12) {
+        showToast("Drag a box around the mark or signature first!", "⚠️");
+        return;
+      }
+      const sx = (cropState.rect.x / canvas.width) * cropState.img.width;
+      const sy = (cropState.rect.y / canvas.height) * cropState.img.height;
+      const sw = (cropState.rect.w / canvas.width) * cropState.img.width;
+      const sh = (cropState.rect.h / canvas.height) * cropState.img.height;
+
+      // Upscale small mark crop to crisp 1024px+ for high-precision OCR
+      const targetScale = Math.max(1, Math.min(3, 1024 / Math.max(sw, sh)));
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = Math.round(sw * targetScale);
+      outCanvas.height = Math.round(sh * targetScale);
+      const outCtx = outCanvas.getContext('2d');
+      outCtx.imageSmoothingEnabled = true;
+      outCtx.imageSmoothingQuality = 'high';
+      outCtx.drawImage(cropState.img, sx, sy, sw, sh, 0, 0, outCanvas.width, outCanvas.height);
+
+      const dataUrl = outCanvas.toDataURL('image/jpeg', 0.95);
+      state.photos.push({
+        name: `macro_mark_crop_${state.photos.length + 1}.jpg`,
+        type: 'image/jpeg',
+        dataUrl: dataUrl,
+        base64: dataUrl.split(',')[1],
+        isMacroCrop: true
+      });
+
+      renderPhotoTray();
+      document.getElementById('crop-modal').classList.add('hidden');
+      showToast("High-res macro mark crop added to tray! 🔍");
+    });
   
     // ==========================================
-    // PHOTO ATTACHMENT & COMPRESSION
+    // HIGH-RES PHOTO ATTACHMENT & COMPRESSION (2048px @ 92%)
     // ==========================================
-    function compressImage(file, maxDimension = 1024, quality = 0.80) {
+    function compressImage(file, maxDimension = 2048, quality = 0.92) {
       return new Promise((resolve, reject) => {
         if (!file.type.startsWith('image/')) {
           return reject(new Error('Selected file is not an image'));
@@ -1365,6 +1121,8 @@ scout
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, width, height);
             const dataUrl = canvas.toDataURL('image/jpeg', quality);
             const base64 = dataUrl.split(',')[1];
@@ -1392,7 +1150,7 @@ scout
   
     async function handleFiles(files) {
       if (!files || files.length === 0) return;
-      showToast("Optimizing photos for AI...", "⏳");
+      showToast("Preparing 2048px high-res images for OCR...", "⏳");
       
       for (let i = 0; i < files.length; i++) {
         try {
@@ -1403,7 +1161,7 @@ scout
         }
       }
       renderPhotoTray();
-      showToast(`${state.photos.length} photo${state.photos.length > 1 ? 's' : ''} attached! 📸`);
+      showToast(`${state.photos.length} high-res photo${state.photos.length > 1 ? 's' : ''} attached! 📸`);
     }
   
     function renderPhotoTray() {
@@ -1426,9 +1184,12 @@ scout
       countText.textContent = `${state.photos.length} photo${state.photos.length > 1 ? 's' : ''} attached`;
   
       tray.innerHTML = state.photos.map((p, idx) => `
-        <div class="relative group w-16 h-16 rounded-xl overflow-hidden border-2 border-[#8fad8c] shadow-sm bg-black">
+        <div class="relative group w-20 h-20 rounded-xl overflow-hidden border-2 ${p.isMacroCrop ? 'border-[#c59b27]' : 'border-[#8fad8c]'} shadow-sm bg-black">
           <img src="${p.dataUrl}" alt="Photo ${idx+1}" class="w-full h-full object-cover">
-          <button onclick="removePhoto(${idx})" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-rose-700 hover:bg-rose-800 text-white flex items-center justify-center text-xs font-bold shadow transition" title="Remove photo">
+          <button type="button" onclick="openCropModal(${idx})" class="absolute bottom-0.5 left-0.5 px-1.5 py-0.5 rounded bg-[#172118]/90 hover:bg-black text-[#e2be58] text-[10px] font-bold shadow" title="Zoom &amp; Crop Mark">
+            🔍
+          </button>
+          <button type="button" onclick="removePhoto(${idx})" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-rose-700 hover:bg-rose-800 text-white flex items-center justify-center text-xs font-bold shadow transition" title="Remove photo">
             ✕
           </button>
         </div>
@@ -1454,7 +1215,6 @@ scout
       showToast("Intake reset");
     });
   
-    // Native Camera & File Listeners
     const camInput = document.getElementById('camera-snap-input');
     const uploadInput = document.getElementById('photo-upload-input');
   
@@ -1494,7 +1254,7 @@ scout
       evalBtn.classList.add('opacity-60', 'cursor-not-allowed');
   
       if (apiKey && state.photos.length > 0) {
-        statusText.textContent = "Scanning signature, pattern & searching live comps with Gemini Vision...";
+        statusText.textContent = "Inspecting high-res marks, testing glyph permutations & searching live comps...";
         try {
           await runGeminiVisionAnalysis(apiKey, notes);
         } catch (err) {
@@ -1520,6 +1280,7 @@ scout
     document.getElementById('btn-evaluate').addEventListener('click', evaluateFind);
   
     async function getSupportedGeminiModels(key) {
+      const scanMode = document.getElementById('scan-precision-mode')?.value || 'forensic';
       try {
         const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
         const listResp = await fetch(listUrl);
@@ -1532,13 +1293,18 @@ scout
                 return methods.includes('generateContent') && 
                        !m.name.includes('embedding') && 
                        !m.name.includes('aqa') && 
-                       !m.name.includes('imagen');
+                       !m.name.includes('imagen') &&
+                       !m.name.includes('tts') &&
+                       !m.name.includes('robotics');
               })
               .map(m => m.name.replace(/^models\//, ''));
             
-            const flash = valid.filter(m => m.includes('flash'));
-            const pro = valid.filter(m => !m.includes('flash'));
-            const combined = [...flash, ...pro];
+            const pro = valid.filter(m => m.includes('pro'));
+            const flash = valid.filter(m => m.includes('flash') && !m.includes('lite'));
+            const lite = valid.filter(m => m.includes('lite'));
+            const combined = scanMode === 'fast'
+              ? [...flash, ...pro, ...lite]
+              : [...pro, ...flash, ...lite];
             if (combined.length > 0) {
               return combined;
             }
@@ -1548,60 +1314,59 @@ scout
         console.warn("Could not list models dynamically, using fallback candidates:", err);
       }
   
-      return [
-        'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-001',
-        'gemini-flash-latest',
-        'gemini-2.5-flash-lite',
-        'gemini-2.5-pro'
-      ];
+      return scanMode === 'fast'
+        ? ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash']
+        : ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'];
     }
   
-    // Live Multimodal Gemini Call with Search Grounding & Safeguards
+    // Universal Forensic Vision + Live Search Grounding Engine
     async function runGeminiVisionAnalysis(key, userNotes) {
-      const prompt = `You are the master vintage authenticator, antique appraiser, and eBay arbitrage analyst for Yami's Attic Treasures.
-Analyze the provided photo(s) using our rigorous 4-step forensic identification protocol:
-  
-STEP 1: UNIVERSAL FORENSIC MARK & HALLMARK DECIPHERMENT (TOP PRIORITY)
-- Examine ALL surfaces across all angles: underside, base, footring, rims, handles, cartouches, stems, labels, and borders for ANY markings, stamps, signatures, or symbols:
-  * Silver & Metalware: Scrutinize for hallmarks, purity numbers ('800', '830', '900', '925', 'STERLING'), silversmith initials or monograms (e.g. 'BZ', 'F.lli', maker punches), assay marks, city symbols (Venetian winged lion, Lombardy, French Minerva, English town marks), or classical motifs (caryatid legs, lion paws, putti).
-  * Ceramics & Art Pottery: Scrutinize the foot and design borders for incised clay script, sgraffito border carvings, underglaze stamps, mold numbers, or artist initials.
-  * CELTIC PREFIX & ROGER McANDREW PROTOCOL: Small raised letters after "M" must be evaluated as Celtic prefixes ('Mc', 'Mac') rather than initials ('M.'). Stylized crossing 'W'/'A' characters must be checked against 'McANDREWS' (not 'M. ANDREAS'). Whimsical bare trees with fine branched sgraffito canopies, checkerboard bands, and unglazed black matte bases are the signature hallmark of American studio potter Roger McAndrew (1941-2022).
-  * Art Glass, Books, Jewelry & Furniture: Check for acid-etched signatures, pontil scarring/polishing, author autographs/imprints, jewelry cartouches, cast iron mold numbers, or mid-century furniture labels.
-- ANTI-HALLUCINATION RULE: If an item cannot be definitively verified, set confidence to "Speculation" and state "I do not know. I do not have enough information." in diagNotes rather than guessing.
-  
-STEP 2: ARTISTIC TECHNIQUE, MATERIAL & PRODUCTION ERA
-- Identify the exact construction, material, era, and geographic origin.
-  
-STEP 3: COMP IDENTIFICATION & TITLE OPTIMIZATION
-- Synthesize verified physical traits, maker/region, pattern, and materials into high-velocity eBay search terms.
-- If an OCR candidate returns zero live market matches, pivot to the top visual/phonetic artist match.
-  
-STEP 4: RESALE PRICING & ARBITRAGE MATH
-- Estimate realistic eBay sold average value based on historical market comps.
-- Buyer always pays shipping: $8.00 standard (or $15.00 fragile/oversized).
-${userNotes ? `
-USER FIELD NOTES: "${userNotes}"` : ''}
+      const prompt = `You are the lead forensic antique authenticator, ceramic/glass/metal mark decipherer, and eBay arbitrage analyst for Yami's Attic Treasures.
+Execute this strict 5-step visual inspection and live web verification protocol on the attached high-resolution image(s):
 
-Return your final output as a pure JSON object (no markdown formatting, no code fences) conforming exactly to this schema:
+STEP 1: EXHAUSTIVE VISUAL & MICRO-MARK INSPECTION (ALL SURFACES & ORIENTATIONS)
+- Examine every surface across all attached images (including any zoomed macro crops): base, foot ring, underside, rims, handles, stems, cartouches, labels, and decorative borders.
+- Identify the exact mark method: incised in clay, sgraffito scratched, impressed/die-stamped, underglaze painted, overglaze transfer/decal, acid-etched, foundry cast, silver/gold hallmark punch, or paper label.
+- Check upright, sideways, vertical, and inverted orientations.
+- Transcribe every visible letter, digit, monogram, or symbol character-by-character, using '?' for unclear strokes.
+
+STEP 2: GLYPH PERMUTATION & AMBIGUOUS CHARACTER ANALYSIS (CRITICAL)
+- Handwritten cursive, incised clay signatures, and tiny metal punches frequently contain visually ambiguous glyphs. Before locking in a reading, generate 3 to 5 plausible character permutations:
+  * Evaluate small raised letters after 'M' as Celtic prefixes ('Mc' or 'Mac') as well as initials ('M.').
+  * Test crossing or looped strokes ('W' vs 'A' vs 'IV' vs 'M'), ('cl' vs 'd'), ('1' vs '7'), ('0' vs 'O'), ('rn' vs 'm'), and ('S' vs '5').
+- NEVER settle on an unverified phonetic guess if another permutation matches a documented artist, pottery, silversmith, or factory.
+
+STEP 3: MANDATORY LIVE GOOGLE SEARCH VERIFICATION & ZERO-RESULT PIVOT
+- Use Google Search to verify your primary mark reading combined with the item's form, material, and decorative motifs (e.g., "[Candidate Name] pottery" or "[Candidate Name] [motif]").
+- ZERO-RESULT PIVOT RULE: If your primary OCR reading returns ZERO matching collector, auction, or eBay records in Google Search, you MUST immediately discard that reading and search your alternate glyph permutations AND motif/form-only queries (e.g., "[glaze/color] [motif] [form] signed pottery/glass/silver") until you find documented market records of the actual maker.
+- ANTI-HALLUCINATION RULE: If neither mark permutations nor visual motif searches yield a verifiable match, set confidence to "Speculation" and state "I do not know. I do not have enough information." in diagNotes.
+
+STEP 4: REALIZED MARKET COMP RESEARCH (EBAY SOLD / WORTHPOINT / AUCTION ARCHIVES)
+- Search live web records for realized sold prices of comparable pieces by the verified maker (filtering out mismatched sizes, damaged pieces, or unrelated items).
+- Set "compPrice" to a realistic, grounded eBay sold average based on the verified comps found.
+- Buyer always pays shipping ($8.00 standard, $15.00 fragile/oversized).
+
+STEP 5: STRUCTURED JSON OUTPUT
+${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON object (no markdown fences, no commentary outside the JSON) matching this exact schema:
 {
-  "itemName": "Specific descriptive title including verified maker/origin and key features",
-  "maker": "Maker / Assay Mark / Origin or 'Unmarked / Unknown'",
+  "itemName": "Specific descriptive title including verified maker/origin, motif, material, and form",
+  "maker": "Verified Maker / Artist Name (with signature transcription if signed) or 'Unmarked / Unknown'",
   "confidence": "Verified | Strong Theory | Working Theory | Speculation",
-  "diagNotes": "Physical hallmarks/signatures observed and authenticity notes",
-  "primaryQuery": "Exact high-volume eBay sold comp keywords",
-  "compPrice": 65.00,
+  "markTranscription": "Exact character-by-character reading, mark method, and location",
+  "alternateReadings": ["Permutation 1", "Permutation 2", "Permutation 3"],
+  "diagNotes": "Detailed forensic breakdown of mark decipherment, construction, authenticity checkpoints, and how live search confirmed the attribution",
+  "primaryQuery": "Exact high-volume eBay sold comp search keywords",
+  "compPrice": 0.00,
   "buyCost": 0.00,
   "shipCharged": 8.00,
   "shipTier": "standard",
-  "category": "eBay Category Path",
-  "era": "Production Era",
+  "category": "Full eBay Category Path",
+  "era": "Production Era / Decade",
   "material": "Primary Materials",
-  "pattern": "Pattern or Motif",
-  "dimensions": "Estimated dimensions",
-  "visualDesc": "2-3 sentences of catalog-quality visual description",
-  "conditionDesc": "Honest vintage condition statement"
+  "pattern": "Pattern or Decorative Motif",
+  "dimensions": "Estimated dimensions from visual proportions",
+  "visualDesc": "2-3 sentences of accurate catalog-quality visual description",
+  "conditionDesc": "Honest vintage condition statement based on visible surfaces"
 }`;
   
       const imageParts = state.photos.map(p => ({
@@ -1612,21 +1377,36 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       }));
   
       const statusText = document.getElementById('eval-status-text');
-      statusText.textContent = "Discovering available Gemini Vision models...";
+      statusText.textContent = "Selecting highest-precision Gemini Vision model...";
   
       const candidateModels = await getSupportedGeminiModels(key);
       let lastErr = null;
       let parsed = null;
       const useGrounding = state.settings.searchGrounding !== false;
+      const useHighRes = state.settings.highResVision !== false;
   
       for (const model of candidateModels) {
-        const attempts = useGrounding ? [true, false] : [false];
-        for (const withSearch of attempts) {
+        // Try combinations: (Search + HighRes) -> (Search only) -> (HighRes only) -> (Standard)
+        const configs = [];
+        if (useGrounding && useHighRes) configs.push({ search: true, highRes: true });
+        if (useGrounding) configs.push({ search: true, highRes: false });
+        if (useHighRes) configs.push({ search: false, highRes: true });
+        configs.push({ search: false, highRes: false });
+
+        for (const cfg of configs) {
           try {
-            statusText.textContent = withSearch
-              ? `Analyzing marks & live Search Grounding with ${model}...`
-              : `Analyzing marks & pattern with ${model}...`;
+            statusText.textContent = cfg.search
+              ? `Inspecting marks & live Search Grounding (${model})...`
+              : `Inspecting marks with Vision OCR (${model})...`;
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+
+            const genConfig = { temperature: 0.15 };
+            if (cfg.highRes) {
+              genConfig.mediaResolution = "MEDIA_RESOLUTION_HIGH";
+            }
+            if (!cfg.search) {
+              genConfig.responseMimeType = "application/json";
+            }
 
             const payloadBody = {
               contents: [{
@@ -1635,12 +1415,9 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
                   ...imageParts
                 ]
               }],
-              generationConfig: {
-                temperature: 0.2,
-                responseMimeType: "application/json"
-              }
+              generationConfig: genConfig
             };
-            if (withSearch) {
+            if (cfg.search) {
               payloadBody.tools = [{ google_search: {} }];
             }
   
@@ -1653,20 +1430,40 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
             if (!resp.ok) {
               const errBody = await resp.json().catch(() => ({}));
               const errMsg = errBody?.error?.message || `HTTP ${resp.status}`;
-              console.warn(`Model ${model} (search=${withSearch}) returned error: ${errMsg}`);
+              console.warn(`Model ${model} (search=${cfg.search}, highRes=${cfg.highRes}) error: ${errMsg}`);
               lastErr = new Error(errMsg);
+              // If quota exceeded (429), jump straight to next model
+              if (resp.status === 429) break;
               continue;
             }
   
             const resData = await resp.json();
-            const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+            const candidate = resData?.candidates?.[0];
+            const text = candidate?.content?.parts?.map(pt => pt.text || '').join('\n');
             if (!text) throw new Error("Empty response from AI model");
   
             let cleanJson = text.trim();
-            const jsonMatch = cleanJson.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-            if (jsonMatch) cleanJson = jsonMatch[1].trim();
+            const fenceMatch = cleanJson.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+            if (fenceMatch) {
+              cleanJson = fenceMatch[1].trim();
+            } else {
+              const firstBrace = cleanJson.indexOf('{');
+              const lastBrace = cleanJson.lastIndexOf('}');
+              if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                cleanJson = cleanJson.slice(firstBrace, lastBrace + 1);
+              }
+            }
   
             parsed = JSON.parse(cleanJson);
+            const gMeta = candidate?.groundingMetadata || {};
+            const queries = gMeta.webSearchQueries || [];
+            const chunks = gMeta.groundingChunks || [];
+            parsed._searchGrounded = cfg.search;
+            parsed._modelUsed = model + (cfg.highRes ? ' (High-Res)' : '');
+            parsed._searchQueries = queries;
+            parsed._groundingSources = chunks
+              .filter(c => c.web && c.web.uri)
+              .map(c => ({ title: c.web.title || c.web.uri, uri: c.web.uri }));
             break;
           } catch (e) {
             lastErr = e;
@@ -1684,15 +1481,15 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
   
       populateItemData(parsed);
       displayQuickResult(parsed);
-      showToast("Item analyzed with Live Gemini Vision! ✨");
+      showToast("High-res forensic inspection complete! ✨");
     }
   
-    // Smart Local Evaluation (when no key or notes-only)
+    // Smart Local Evaluation (notes-only)
     function runLocalEvaluation(notes, notePrefix = '') {
       let comp = 48.00;
       let buy = 0.00;
       let name = "Vintage Handcrafted Art Glass / Ceramic Piece";
-      let maker = "Attributed Studio Artist";
+      let maker = "Unverified / Notes Only";
   
       const priceMatch = (notes || '').match(/(?:asking|cost|buy|pay|price|at)\s*\$?(\d+(?:\.\d{2})?)/i);
       if (priceMatch) {
@@ -1710,24 +1507,30 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
         itemName: name,
         maker: maker,
         confidence: "Working Theory",
-        diagNotes: notePrefix ? `${notePrefix} Visual inspection indicates vintage production.` : "Visual inspection indicates mid-century handcrafted production with finished base.",
+        markTranscription: "No photo provided — evaluated from field notes",
+        alternateReadings: [],
+        diagNotes: notePrefix ? `${notePrefix} Evaluated from text notes.` : "Evaluated from text notes without photo inspection.",
         primaryQuery: name,
         compPrice: comp,
         buyCost: buy,
         shipCharged: 8.00,
         shipTier: "standard",
-        category: "Pottery & Glass > Decorative Cookware, Dinnerware & Serveware > Bowls",
-        era: "Mid-to-Late 20th Century",
-        material: "Ceramic / Art Glass",
-        pattern: "Artisan Handcrafted",
-        dimensions: "Approx. 6 in x 4 in",
-        visualDesc: "Distinctive vintage piece featuring artisan craftsmanship and clean form.",
-        conditionDesc: "Very good vintage condition with no chips or cracks. Light surface wear on base consistent with age."
+        category: "Antiques & Collectibles",
+        era: "Vintage",
+        material: "Mixed",
+        pattern: "",
+        dimensions: "",
+        visualDesc: "Evaluated from user notes.",
+        conditionDesc: "Inspect physical item for chips, cracks, or wear.",
+        _searchGrounded: false,
+        _modelUsed: "Local Calculator",
+        _searchQueries: [],
+        _groundingSources: []
       };
   
       populateItemData(mockData);
       displayQuickResult(mockData);
-      showToast("Quick comp evaluated! Add Gemini Key in Settings for live AI. ℹ️");
+      showToast("Quick comp evaluated from notes! ℹ️");
     }
 
     // Grounded Financial Helper
@@ -1783,19 +1586,43 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
   
       document.getElementById('spec-brand').value = data.maker || '';
       document.getElementById('spec-type').value = data.pattern || 'Collectible';
-      document.getElementById('spec-era').value = data.era || 'Mid-20th Century';
+      document.getElementById('spec-era').value = data.era || 'Vintage';
       document.getElementById('spec-material').value = data.material || '';
       document.getElementById('spec-dimensions').value = data.dimensions || '';
       document.getElementById('spec-category').value = data.category || '';
       document.getElementById('studio-diag-notes').value = data.diagNotes || '';
       document.getElementById('studio-condition-desc').value = data.conditionDesc || '';
+
+      // Populate Grounding & Permutations Audit Box in Listing Studio
+      document.getElementById('audit-model-badge').textContent = data._modelUsed || 'Gemini Vision';
+      const perms = Array.isArray(data.alternateReadings) && data.alternateReadings.length > 0
+        ? data.alternateReadings.join('  |  ')
+        : (data.markTranscription || 'None recorded');
+      document.getElementById('audit-permutations-val').textContent = perms;
+
+      const queries = Array.isArray(data._searchQueries) && data._searchQueries.length > 0
+        ? data._searchQueries.join('  •  ')
+        : (data._searchGrounded ? 'Live Search Grounding active' : 'Vision-only mode');
+      document.getElementById('audit-queries-val').textContent = queries;
+
+      const srcBox = document.getElementById('audit-sources-container');
+      const srcList = document.getElementById('audit-sources-list');
+      if (Array.isArray(data._groundingSources) && data._groundingSources.length > 0) {
+        srcList.innerHTML = data._groundingSources.slice(0, 6).map(s =>
+          `<li><a href="${s.uri}" target="_blank" class="underline text-[#b8860b] hover:text-[#2c2016]">${s.title}</a></li>`
+        ).join('');
+        srcBox.classList.remove('hidden');
+      } else {
+        srcBox.classList.add('hidden');
+        srcList.innerHTML = '';
+      }
   
       calculateFinancials();
       updateStudio();
       updateSearchLinks();
     }
   
-    // Display The Quick & Easy Answer Result Card
+    // Display Quick Result Card
     function displayQuickResult(data) {
       const card = document.getElementById('quick-result-card');
       const verdictPill = document.getElementById('result-verdict-pill');
@@ -1803,6 +1630,7 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       const itemNameHead = document.getElementById('result-item-name');
       const makerVal = document.getElementById('result-maker-val');
       const eraVal = document.getElementById('result-era-val');
+      const markReadVal = document.getElementById('result-mark-reading-val');
       const compHead = document.getElementById('result-comp-price-head');
       const compVal = document.getElementById('result-comp-val');
       const target3xVal = document.getElementById('result-target3x-val');
@@ -1818,11 +1646,13 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       itemNameHead.textContent = data.itemName || 'Vintage Sourced Item';
       makerVal.textContent = data.maker || 'Unmarked / Unknown';
       eraVal.textContent = data.era || 'Vintage Era';
+      markReadVal.textContent = data.markTranscription || data.diagNotes || 'No mark transcription';
       compHead.textContent = `$${comp.toFixed(2)}`;
       compVal.textContent = `$${comp.toFixed(2)}`;
       target3xVal.textContent = `$${m.target3x.toFixed(2)}`;
       profitVal.textContent = `${m.netProfit >= 0 ? '+' : ''}$${m.netProfit.toFixed(2)}`;
-      confPill.textContent = data.confidence || 'Attributed';
+      const groundTag = data._searchGrounded ? ' • 🌐 Search Grounded' : ' • 📷 Vision Only';
+      confPill.textContent = (data.confidence || 'Attributed') + groundTag;
   
       if (buy > 0) {
         if (buy <= m.target3x) {
@@ -1900,7 +1730,6 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    // Actions on Quick Result Card
     document.getElementById('btn-see-details').addEventListener('click', () => {
       switchTab('studio');
     });
@@ -1914,7 +1743,6 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   
-    // MARK AS BOUGHT BUTTON & AUTO-SYNC TO GOOGLE DRIVE
     document.getElementById('btn-quick-bought').addEventListener('click', () => {
       let currentBuy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
       const target3x = parseFloat(document.getElementById('limit-3x-display').textContent.replace(/[^0-9.-]/g, '')) || 0;
@@ -2294,14 +2122,17 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       const item = state.queue[idx];
       if (!item) return;
   
-      document.getElementById('input-item-name').value = item.name;
-      document.getElementById('input-maker').value = item.maker;
-      document.getElementById('input-comp-price').value = item.comp.toFixed(2);
-      document.getElementById('input-buy-cost').value = item.buy.toFixed(2);
-      document.getElementById('input-ship-tier').value = item.shipTier;
-      
-      calculateFinancials();
-      updateStudio();
+      if (item.data) {
+        populateItemData(item.data);
+      } else {
+        document.getElementById('input-item-name').value = item.name;
+        document.getElementById('input-maker').value = item.maker;
+        document.getElementById('input-comp-price').value = item.comp.toFixed(2);
+        document.getElementById('input-buy-cost').value = item.buy.toFixed(2);
+        document.getElementById('input-ship-tier').value = item.shipTier;
+        calculateFinancials();
+        updateStudio();
+      }
       switchTab('studio');
       showToast(`Loaded "${item.name}"`);
     };
@@ -2354,7 +2185,7 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
   
     function updateKeyBadge() {
       if (state.settings.geminiKey) {
-        keyBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#587654]"></span> Gemini AI Vision Ready';
+        keyBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#587654]"></span> Gemini High-Res Vision Ready';
         keyInput.value = state.settings.geminiKey;
       } else {
         keyBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#b8860b]"></span> Offline Comp Mode (Set Key in ⚙️)';
@@ -2386,6 +2217,7 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       state.settings.gdriveWebhook = (document.getElementById('set-gdrive-webhook').value || '').trim();
       state.settings.gdriveAutosync = document.getElementById('set-gdrive-autosync').checked;
       state.settings.searchGrounding = document.getElementById('set-search-grounding').checked;
+      state.settings.highResVision = document.getElementById('set-high-res-vision').checked;
   
       try {
         localStorage.setItem('yami_settings', JSON.stringify(state.settings));
@@ -2417,6 +2249,10 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
       if (searchGroundCheck) {
         searchGroundCheck.checked = state.settings.searchGrounding !== false;
       }
+      const highResCheck = document.getElementById('set-high-res-vision');
+      if (highResCheck) {
+        highResCheck.checked = state.settings.highResVision !== false;
+      }
       document.getElementById('set-fee-rate').value = state.settings.feeRate || 13.25;
       document.getElementById('set-std-ship').value = state.settings.stdShip || 8.00;
       document.getElementById('calc-fee-rate-label').textContent = `${state.settings.feeRate || 13.25}%`;
@@ -2426,38 +2262,40 @@ Return your final output as a pure JSON object (no markdown formatting, no code 
   </script>
 </body>
 </html>
-What Was Included & Fixed in scout.html
-Fixed sendToGoogleDrive & getCurrentItemPayload(): Defined both missing functions and wired them to Mark as Bought, automatic post-scan sync, Sync to Google Drive, and Add to Queue so your 22-column inventory records post cleanly to your Master Inventory Sheet without throwing a ReferenceError.
+What Was Upgraded in scout.html (Universal High-Res Mark & Comp Engine)
+All artist-specific hardcoding has been removed and replaced with a universal visual-inspection and live-verification pipeline built for any antique, pottery, glass, metalware, or collectible mark:
 
-Synchronous N-Photo Stitching for Google Lens: Tapping 🌐 Visual Match (Lens) or 🌐 Google Lens automatically stitches multiple attached photos onto a single high-resolution grid image, copies it to your clipboard, and opens Google Lens so both the overall piece and close-up mark are searched together.
+2048px High-Resolution Capture + MEDIA_RESOLUTION_HIGH Token Processing:
 
-Live Gemini 2.0/2.5 Search Grounding + Auto-Fallback: Runs live Google Search Grounding during visual analysis (configurable in ⚙️ Settings) and automatically falls back to standard multimodal Vision if a key hits tool or rate limits.
+Upgraded client-side image processing from 1024px @ 80% to 2048px @ 92% JPEG with high-quality smoothing so incised clay cursive, tiny silver hallmarks, and acid-etched glass marks stay sharp.
 
-Universal Forensic Mark & Roger McAndrew Safeguards: Evaluates raised letters after "M" as Celtic prefixes (Mc/Mac), checks stylized crossing W/A glyphs (McANDREWS vs. M. ANDREAS), correlates sgraffito bare-tree/checkerboard/matte-base motifs, and enforces the strict "I do not know" anti-hallucination rule when unverified.
+Added "mediaResolution": "MEDIA_RESOLUTION_HIGH" inside generationConfig (with an automatic fallback if a model doesn't support it) so Gemini inspects the full high-density tiled image grid instead of downsampling.
 
-Grounded eBay 2026 Margin & 3x/2x Buy Target Engine: Computes Gross (Comp + Buyer Shipping), 1.07x taxable FVF assessment base, $0.40/$0.30 fixed order fee, shipping/packing deductions, and rounded $0.50 3x/2x net buy limits.
+1-Tap 🔍 Crop Mark Macro Zoom Tool:
 
-How to Upload Directly to GitHub (No Copy-Pasting Needed)
-Download the scout.html file above to your computer.
+Every photo thumbnail in your tray now includes a 🔍 button (plus a 🔍 Crop Mark button on the tray toolbar) that opens an interactive zoom/crop modal.
 
-Open your GitHub repository (yamisattictreasures/yamis-attic-treasures) on the main branch.
+Drag a tight box around any small signature, backstamp, or hallmark on your phone or desktop and tap Add Macro Crop to Tray—it upscales and attaches that zoomed close-up alongside your full-piece photo.
 
-Click Add file 
+Universal Glyph-Permutation & Zero-Result Pivot Protocol:
+
+Forces character-by-character mark transcription (recording mark method, location, and orientation, with ? for unclear strokes) and requires 3 to 5 alternate character permutations (M vs. Mc/Mac, W vs. A/IV/M, cl vs. d, 1 vs. 7, 0 vs. O, rn vs. m).
+
+Zero-Result Pivot: If live Google Search returns zero collector, auction, or eBay records for the initial OCR reading, the AI automatically discards that guess and tests its alternate character permutations and motif/form searches until it finds documented market comps—or declares "I do not know. I do not have enough information."
+
+Forensic Deep OCR Model Priority + Mode Selector:
+
+Prioritizes gemini-2.5-pro first by default for complex cursive and worn hallmarks, with a 1-tap dropdown next to Evaluate Find to switch between 🔬 Forensic Deep OCR (Pro First) and ⚡ Fast Field Scan (Flash First).
+
+Live Search Grounding & Mark Permutations Audit Trail:
+
+Inside Listing Studio, a new Forensic OCR & Live Search Grounding Audit panel displays the exact model used, every alternate mark permutation tested, the live Google Search queries executed, and clickable links to the grounded web sources used to calculate your sold comp average.
+
+How to Deploy to GitHub
+Download scout.html above.
+
+Go to your yamisattictreasures/yamis-attic-treasures repository on GitHub (main branch), click Add file 
 →
-→ Upload files.
+→ Upload files, drag and drop scout.html to overwrite the existing file, and click Commit changes.
 
-Drag and drop your downloaded scout.html file onto the page (GitHub will automatically overwrite the existing scout.html file).
-
-Click Commit changes at the bottom. Cloudflare will automatically build and deploy the updated app within ~30 seconds.
-
-All
-
-
-
-
-
-Gemini is AI and can make mistakes.
-
-Analyzing
-
-Your Library
+Wait ~30 seconds for Cloudflare to build and deploy, then hard-refresh your live page.
