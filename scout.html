@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yami's Attic Treasures — Sourcing Scout v4.3 Mobile Pro</title>
+  <title>Yami's Attic Treasures — Sourcing Scout v4.4</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -108,14 +108,14 @@
       </div>
     </div>
   
-    <!-- Navigation & Status Bar (Mobile-Optimized Single-Row Tabs) -->
+    <!-- Navigation & Status Bar -->
     <div class="max-w-7xl mx-auto px-2.5 sm:px-6 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
       <div class="flex items-center justify-between sm:justify-start gap-2">
         <h1 class="font-brand font-bold text-xs sm:text-lg text-[#2c3d2a] tracking-wider uppercase">
           Sourcing Scout &amp; Command Center
         </h1>
         <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#222e23] text-[#d3e2d0] border border-[#587654] font-mono shadow-inner">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#8fad8c] animate-pulse"></span>v4.3 Mobile
+          <span class="w-1.5 h-1.5 rounded-full bg-[#8fad8c] animate-pulse"></span>v4.4 Live
         </span>
       </div>
   
@@ -129,7 +129,7 @@
         <button id="tab-queue-btn" class="px-2 sm:px-4 py-1.5 rounded-lg font-medium transition text-[#d3e2d0] hover:text-[#f5f8f4] text-center truncate">
           📦 Queue (<span id="queue-count">0</span>)
         </button>
-        <button id="tab-settings-btn" class="px-2 sm:px-3 py-1.5 rounded-lg font-medium transition text-[#d3e2d0] hover:text-[#f5f8f4] text-center truncate" title="Settings &amp; Gemini API Key">
+        <button id="tab-settings-btn" class="px-2 sm:px-3 py-1.5 rounded-lg font-medium transition text-[#d3e2d0] hover:text-[#f5f8f4] text-center truncate" title="Settings &amp; API Key">
           ⚙️ Setup
         </button>
       </nav>
@@ -147,8 +147,8 @@
     <div class="bg-[#fdfbf7] border-2 border-[#8fad8c] rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-[#d3e2d0] pb-2.5">
         <div>
-          <h3 class="font-brand font-bold text-base sm:text-lg text-[#2c2016]">🔍 Macro Mark &amp; Signature Zoom</h3>
-          <p class="text-xs text-[#587654]">Drag across the signature, hallmark, or backstamp to attach a high-res close-up.</p>
+          <h3 class="font-brand font-bold text-base sm:text-lg text-[#2c2016]">🔍 Zoom &amp; Crop Mark</h3>
+          <p class="text-xs text-[#587654]">Drag a box around the signature, hallmark, or stamp to attach a close-up.</p>
         </div>
         <button type="button" id="btn-close-crop" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold border border-rose-200">
           ✕ Close
@@ -160,13 +160,13 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-        <span id="crop-hint-text" class="text-xs text-[#587654] font-medium">Tip: Drag a tight box around the maker's mark, then tap Add Macro Crop.</span>
+        <span id="crop-hint-text" class="text-xs text-[#587654] font-medium">Drag a tight box around the maker's mark, then tap Add Close-Up.</span>
         <div class="flex items-center gap-2 ml-auto">
           <button type="button" id="btn-reset-crop-box" class="px-3 py-2 bg-[#edf4eb] hover:bg-[#e0ece0] text-[#2c3d2a] border border-[#8fad8c] rounded-xl text-xs font-bold">
             Reset Box
           </button>
           <button type="button" id="btn-apply-crop" class="px-4 py-2 bg-gradient-to-r from-[#b8860b] to-[#c59b27] hover:brightness-105 text-[#1c140c] font-black text-xs rounded-xl shadow">
-            ✅ Add Macro Crop to Tray
+            ✅ Add Close-Up
           </button>
         </div>
       </div>
@@ -206,8 +206,8 @@
         <!-- Photo Thumbnail Preview Strip -->
         <div id="photo-tray-container" class="rounded-xl border-2 border-dashed border-[#8fad8c]/70 bg-[#f4f8f3] p-3 transition">
           <div id="photo-empty-state" class="text-center py-3 sm:py-4 text-xs sm:text-sm text-[#465e43]">
-            <p class="font-medium">Point your camera at maker marks, signatures, and full piece.</p>
-            <p class="text-[11px] text-[#72926d] mt-0.5">2048px High-Res Capture + High-Token OCR • Tap 🔍 on any photo to crop a small mark.</p>
+            <p class="font-medium">Take a photo of the full item and a close-up of any maker's mark or signature.</p>
+            <p class="text-[11px] text-[#72926d] mt-0.5">Tap 🔍 on any photo thumbnail to zoom and crop a small mark.</p>
           </div>
   
           <div id="photo-tray" class="hidden flex flex-wrap items-center gap-3">
@@ -234,19 +234,15 @@
           <label for="scout-notes-input" class="block text-xs font-bold text-[#587654] uppercase tracking-wider">
             Notes / Asking Price (Optional)
           </label>
-          <textarea id="scout-notes-input" rows="2" class="w-full bg-[#f8faf7] border-2 border-[#b5ccb1] rounded-xl p-3 text-xs sm:text-sm text-[#2b2219] placeholder-[#72926d]/60 font-sans focus:outline-none focus:border-[#587654] focus:ring-1 focus:ring-[#587654] transition custom-scroll" placeholder="e.g. Asking $15 at estate sale, incised mark on underside..."></textarea>
+          <textarea id="scout-notes-input" rows="2" class="w-full bg-[#f8faf7] border-2 border-[#b5ccb1] rounded-xl p-3 text-xs sm:text-sm text-[#2b2219] placeholder-[#72926d]/60 font-sans focus:outline-none focus:border-[#587654] focus:ring-1 focus:ring-[#587654] transition custom-scroll" placeholder="e.g. Asking $15 at estate sale, stamped on back..."></textarea>
         </div>
   
-        <!-- Evaluate / Scan Mode Bar -->
+        <!-- Evaluate Bar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-          <div class="flex flex-wrap items-center justify-between sm:justify-start gap-2 text-[11px] text-[#587654]">
+          <div class="flex items-center gap-2 text-[11px] text-[#587654]">
             <span id="gemini-key-status" class="inline-flex items-center gap-1 font-medium">
-              <span class="w-2 h-2 rounded-full bg-[#587654]"></span> Gemini AI Vision Ready
+              <span class="w-2 h-2 rounded-full bg-[#587654]"></span> Scanner Ready
             </span>
-            <select id="scan-precision-mode" class="bg-[#edf4eb] border border-[#8fad8c] text-[#2c3d2a] font-bold rounded-lg px-2 py-1 text-[11px] focus:outline-none">
-              <option value="forensic">🔬 Forensic Deep OCR (Pro First)</option>
-              <option value="fast">⚡ Fast Field Scan (Flash First)</option>
-            </select>
           </div>
   
           <button id="btn-evaluate" class="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-[#b8860b] via-[#c59b27] to-[#e2be58] hover:from-[#a07409] hover:to-[#c59b27] text-[#1c140c] font-black text-sm sm:text-base rounded-xl shadow-xl transition flex items-center justify-center gap-2">
@@ -262,7 +258,7 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
           <span id="eval-status-text" class="text-xs sm:text-sm font-semibold text-[#2c3d2a]">
-            Inspecting high-res marks, testing glyph permutations &amp; verifying live comps...
+            Identifying item, checking maker's marks &amp; recent sold prices...
           </span>
         </div>
       </div>
@@ -279,7 +275,7 @@
               🟢 GOOD BUY
             </span>
             <span id="result-confidence-pill" class="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-[#edf4eb] text-[#465e43] border border-[#b5ccb1]">
-              Verified Maker
+              Verified
             </span>
           </div>
   
@@ -392,7 +388,7 @@
           <div class="border-b border-[#d3e2d0] pb-3">
             <h3 class="font-brand font-bold text-base text-[#2c2016] flex items-center gap-2">
               <span>💰</span>
-              <span>Financial Audit &amp; eBay 2026 Math</span>
+              <span>Financial Audit &amp; Profit Math</span>
             </h3>
             <p class="text-xs text-[#587654]">Includes 7% buyer tax buffer on FVF base &amp; buyer-pays-shipping defaults.</p>
           </div>
@@ -491,32 +487,14 @@
           </div>
         </div>
   
-        <!-- Right Column: SEO Listing Studio & Forensic Audit (7 cols) -->
+        <!-- Right Column: SEO Listing Studio (7 cols) -->
         <div class="lg:col-span-7 space-y-4 bg-[#fdfbf7] p-4 sm:p-6 rounded-2xl border-2 border-[#b5ccb1] shadow-xl">
           <div class="border-b border-[#d3e2d0] pb-3 flex items-center justify-between">
             <h3 class="font-brand font-bold text-base text-[#2c2016] flex items-center gap-2">
               <span>📝</span>
-              <span>eBay SEO Listing Studio &amp; Forensic Audit</span>
+              <span>eBay SEO Listing Studio</span>
             </h3>
             <span class="text-xs text-[#587654] font-mono">1-Click Copy</span>
-          </div>
-
-          <!-- Live Search Grounding & Mark Permutations Audit Box -->
-          <div id="grounding-audit-box" class="p-3.5 rounded-xl bg-[#f4f8f3] border border-[#8fad8c] space-y-2 text-xs">
-            <div class="flex flex-wrap items-center justify-between gap-1.5">
-              <span class="font-bold text-[#2c3d2a] uppercase tracking-wider">🔬 Forensic OCR &amp; Search Audit</span>
-              <span id="audit-model-badge" class="font-mono text-[11px] px-2 py-0.5 rounded bg-[#e8f0e6] text-[#2c3d2a] border border-[#b5ccb1]">—</span>
-            </div>
-            <div class="text-[#2c2016]">
-              <strong>Mark Permutations Tested:</strong> <span id="audit-permutations-val" class="font-mono text-[#465e43]">None yet</span>
-            </div>
-            <div class="text-[#2c2016]">
-              <strong>Live Google Search Queries:</strong> <span id="audit-queries-val" class="font-mono text-[#465e43]">None yet</span>
-            </div>
-            <div id="audit-sources-container" class="hidden pt-1 border-t border-[#d3e2d0]">
-              <strong class="block text-[#2c3d2a] mb-1">Grounded Web Sources:</strong>
-              <ul id="audit-sources-list" class="list-disc list-inside space-y-0.5 text-[11px] text-[#465e43]"></ul>
-            </div>
           </div>
   
           <!-- 80-Char SEO Title -->
@@ -533,7 +511,7 @@
             </div>
           </div>
   
-          <!-- Forensic Item Specifics -->
+          <!-- Item Specifics -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
             <div class="space-y-1">
               <label class="block font-semibold text-[#587654]">Brand / Maker</label>
@@ -564,9 +542,9 @@
             </div>
           </div>
   
-          <!-- Forensic Decipherment Notes -->
+          <!-- Mark & Authentication Notes -->
           <div class="space-y-1">
-            <label class="block text-xs font-bold text-[#587654] uppercase">Forensic Mark &amp; Authentication Notes</label>
+            <label class="block text-xs font-bold text-[#587654] uppercase">Mark &amp; Authentication Notes</label>
             <textarea id="studio-diag-notes" rows="2" class="w-full bg-[#f8faf7] border border-[#b5ccb1] rounded-xl p-2.5 text-xs text-[#2c2016] font-sans custom-scroll"></textarea>
           </div>
   
@@ -613,7 +591,7 @@
                 Auto-Saved
               </span>
             </div>
-            <p class="text-xs text-[#587654] mt-0.5">Tap <strong>Buy ($)</strong> to record cost &amp; sync to Drive, or <strong>Studio</strong> to edit &amp; list.</p>
+            <p class="text-xs text-[#587654] mt-0.5">Tap <strong>Mark Bought ($)</strong> to record cost &amp; sync to Drive, or <strong>Studio</strong> to edit &amp; list.</p>
           </div>
 
           <div class="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2">
@@ -629,7 +607,7 @@
           </div>
         </div>
   
-        <!-- Compact 3-Column Session KPI Strip (Fits 1 Row on Mobile) -->
+        <!-- Compact 3-Column Session KPI Strip -->
         <div class="grid grid-cols-3 gap-2 sm:gap-3 font-mono">
           <div class="p-2.5 sm:p-3 bg-[#f8faf7] border border-[#d3e2d0] rounded-xl text-center sm:flex sm:items-center sm:justify-between">
             <span class="block text-[10px] sm:text-xs font-sans text-[#587654]">Scanned</span>
@@ -645,7 +623,7 @@
           </div>
         </div>
 
-        <!-- Mobile & Desktop Filter Pills -->
+        <!-- Filter Pills -->
         <div class="flex items-center gap-2 pt-0.5">
           <button type="button" id="filter-queue-all" onclick="setQueueFilter('all')" class="px-3 py-1 rounded-full text-xs font-bold bg-[#2c3d2a] text-[#fdfbf7] transition">
             All Items
@@ -663,9 +641,8 @@
           No items in queue yet. Evaluate an item in Sourcing Scout to log it here automatically.
         </p>
 
-        <!-- MOBILE CARD STACK (< 768px): Full-width readable titles, 4-metric grid, thumb-friendly buttons -->
+        <!-- MOBILE CARD STACK (< 768px) -->
         <div id="queue-mobile-cards" class="md:hidden space-y-3">
-          <!-- Dynamic mobile cards injected here -->
         </div>
 
         <!-- DESKTOP TABLE (>= 768px) -->
@@ -690,7 +667,7 @@
     </section>
   
     <!-- ========================================== -->
-    <!-- TAB 4: SETTINGS & GEMINI API KEY           -->
+    <!-- TAB 4: SETTINGS & API KEY                  -->
     <!-- ========================================== -->
     <section id="tab-settings" class="hidden space-y-6">
       <div class="p-4 sm:p-7 rounded-2xl bg-[#fdfbf7] border-2 border-[#b5ccb1] shadow-xl space-y-6 max-w-3xl mx-auto">
@@ -698,19 +675,19 @@
           <h3 class="font-brand font-bold text-lg text-[#2c2016] flex items-center gap-2">
             <span>⚙️</span> System Settings &amp; Integrations
           </h3>
-          <p class="text-xs text-[#587654]">Configure your Google Gemini API key, High-Res Vision OCR, Search Grounding, and Google Drive Sheet webhook.</p>
+          <p class="text-xs text-[#587654]">Configure your API key, Google Drive Sheet webhook, and eBay fee defaults.</p>
         </div>
   
-        <!-- Gemini API Key Setup -->
+        <!-- API Key Setup -->
         <div class="p-4 rounded-xl bg-[#f4f8f3] border border-[#8fad8c] space-y-3">
           <div class="flex items-center justify-between">
             <label class="block text-xs font-bold text-[#2c2016] uppercase tracking-wider">
-              Google Gemini API Key (High-Res Vision + Search Grounding)
+              Google Gemini API Key
             </label>
-            <span class="text-[11px] text-[#587654]">Stored locally</span>
+            <span class="text-[11px] text-[#587654]">Saved on this device</span>
           </div>
           <p class="text-xs text-[#587654]">
-            Manage your key in <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline text-[#b8860b] font-semibold">Google AI Studio</a>. Linked Google Cloud billing enables live Google Search Grounding for real-time maker and sold comp verification.
+            Manage your key in <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline text-[#b8860b] font-semibold">Google AI Studio</a>.
           </p>
           <div class="flex flex-wrap gap-2">
             <input type="password" id="set-gemini-key" class="flex-1 min-w-[180px] bg-[#fdfbf7] border border-[#b5ccb1] rounded-xl px-3 py-2 text-xs font-mono text-[#2c2016] focus:outline-none focus:border-[#587654]" placeholder="Paste AIzaSy... key here">
@@ -724,22 +701,8 @@
           <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
             <span class="text-[11px] text-[#587654]">Tip: Save this bookmark URL to your phone Home Screen so your key never resets.</span>
             <button type="button" id="btn-copy-magic-url" class="px-3 py-1.5 bg-[#edf4eb] hover:bg-[#e0ece0] border border-[#8fad8c] text-[#2c3d2a] text-[11px] font-bold rounded-lg transition">
-              📱 Copy Auto-Key Phone Bookmark URL
+              📱 Copy Phone Bookmark URL
             </button>
-          </div>
-          <div class="space-y-1.5 pt-1">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" id="set-search-grounding" checked class="w-4 h-4 rounded text-[#587654] bg-[#f8faf7] border-[#b5ccb1]">
-              <label for="set-search-grounding" class="text-xs text-[#2c3d2a] font-semibold cursor-pointer">
-                Enable Live Google Search Grounding (verifies marks &amp; live sold comps on the web)
-              </label>
-            </div>
-            <div class="flex items-center gap-2">
-              <input type="checkbox" id="set-high-res-vision" checked class="w-4 h-4 rounded text-[#587654] bg-[#f8faf7] border-[#b5ccb1]">
-              <label for="set-high-res-vision" class="text-xs text-[#2c3d2a] font-semibold cursor-pointer">
-                Enable High-Density Vision Tokens (MEDIA_RESOLUTION_HIGH for small marks/cursive)
-              </label>
-            </div>
           </div>
         </div>
   
@@ -816,17 +779,11 @@
         pattern: "",
         dimensions: "",
         visualDesc: "",
-        conditionDesc: "",
-        _searchGrounded: false,
-        _modelUsed: "",
-        _searchQueries: [],
-        _groundingSources: []
+        conditionDesc: ""
       },
       queue: [],
       settings: {
         geminiKey: '',
-        searchGrounding: true,
-        highResVision: true,
         feeRate: 13.25,
         stdShip: 8.00,
         stdPack: 1.00,
@@ -1183,11 +1140,11 @@
 
       renderPhotoTray();
       document.getElementById('crop-modal').classList.add('hidden');
-      showToast("High-res macro mark crop added to tray! 🔍");
+      showToast("Close-up added to tray! 🔍");
     });
   
     // ==========================================
-    // HIGH-RES PHOTO ATTACHMENT & COMPRESSION (2048px @ 92%)
+    // HIGH-RES PHOTO ATTACHMENT & COMPRESSION (2048px @ 92% silently)
     // ==========================================
     function compressImage(file, maxDimension = 2048, quality = 0.92) {
       return new Promise((resolve, reject) => {
@@ -1242,7 +1199,7 @@
   
     async function handleFiles(files) {
       if (!files || files.length === 0) return;
-      showToast("Preparing 2048px high-res images for OCR...", "⏳");
+      showToast("Preparing photos...", "⏳");
       
       for (let i = 0; i < files.length; i++) {
         try {
@@ -1253,7 +1210,7 @@
         }
       }
       renderPhotoTray();
-      showToast(`${state.photos.length} high-res photo${state.photos.length > 1 ? 's' : ''} attached! 📸`);
+      showToast(`${state.photos.length} photo${state.photos.length > 1 ? 's' : ''} attached! 📸`);
     }
   
     function renderPhotoTray() {
@@ -1317,7 +1274,7 @@
     uploadInput.addEventListener('change', (e) => handleFiles(e.target.files));
   
     // ==========================================
-    // EVALUATE FIND & AI VISION ENGINE
+    // EVALUATE FIND & VISION ENGINE
     // ==========================================
     async function evaluateFind() {
       const notes = (document.getElementById('scout-notes-input').value || '').trim();
@@ -1336,7 +1293,7 @@
       const apiKey = (rawKey || '').trim();
   
       if (state.photos.length > 0 && !apiKey) {
-        showToast("Gemini API Key Required! Set in Setup ⚙️", "⚠️");
+        showToast("API Key Required — Set in Setup ⚙️", "⚠️");
         switchTab('settings');
         return;
       }
@@ -1346,15 +1303,15 @@
       evalBtn.classList.add('opacity-60', 'cursor-not-allowed');
   
       if (apiKey && state.photos.length > 0) {
-        statusText.textContent = "Inspecting high-res marks, testing glyph permutations & searching live comps...";
+        statusText.textContent = "Identifying item, checking maker's marks & recent sold prices...";
         try {
           await runGeminiVisionAnalysis(apiKey, notes);
         } catch (err) {
-          console.error("Gemini Vision Error:", err);
+          console.error("Vision Error:", err);
           statusBox.classList.add('hidden');
           evalBtn.disabled = false;
           evalBtn.classList.remove('opacity-60', 'cursor-not-allowed');
-          showToast(`API Error: ${err.message.substring(0, 60)}`, "⚠️");
+          showToast(`Error: ${err.message.substring(0, 60)}`, "⚠️");
           return;
         }
       } else {
@@ -1372,7 +1329,6 @@
     document.getElementById('btn-evaluate').addEventListener('click', evaluateFind);
   
     async function getSupportedGeminiModels(key) {
-      const scanMode = document.getElementById('scan-precision-mode')?.value || 'forensic';
       try {
         const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
         const listResp = await fetch(listUrl);
@@ -1394,9 +1350,7 @@
             const pro = valid.filter(m => m.includes('pro'));
             const flash = valid.filter(m => m.includes('flash') && !m.includes('lite'));
             const lite = valid.filter(m => m.includes('lite'));
-            const combined = scanMode === 'fast'
-              ? [...flash, ...pro, ...lite]
-              : [...pro, ...flash, ...lite];
+            const combined = [...pro, ...flash, ...lite];
             if (combined.length > 0) {
               return combined;
             }
@@ -1406,12 +1360,10 @@
         console.warn("Could not list models dynamically, using fallback candidates:", err);
       }
   
-      return scanMode === 'fast'
-        ? ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash']
-        : ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+      return ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'];
     }
   
-    // Universal Forensic Vision + Live Search Grounding Engine
+    // High-Precision Vision + Silent Live Web Verification Engine
     async function runGeminiVisionAnalysis(key, userNotes) {
       const prompt = `You are the lead forensic antique authenticator, ceramic/glass/metal mark decipherer, and eBay arbitrage analyst for Yami's Attic Treasures.
 Execute this strict 5-step visual inspection and live web verification protocol on the attached high-resolution image(s):
@@ -1428,9 +1380,9 @@ STEP 2: GLYPH PERMUTATION & AMBIGUOUS CHARACTER ANALYSIS (CRITICAL)
   * Test crossing or looped strokes ('W' vs 'A' vs 'IV' vs 'M'), ('cl' vs 'd'), ('1' vs '7'), ('0' vs 'O'), ('rn' vs 'm'), and ('S' vs '5').
 - NEVER settle on an unverified phonetic guess if another permutation matches a documented artist, pottery, silversmith, or factory.
 
-STEP 3: MANDATORY LIVE GOOGLE SEARCH VERIFICATION & ZERO-RESULT PIVOT
+STEP 3: MANDATORY LIVE WEB VERIFICATION & ZERO-RESULT PIVOT
 - Use Google Search to verify your primary mark reading combined with the item's form, material, and decorative motifs (e.g., "[Candidate Name] pottery" or "[Candidate Name] [motif]").
-- ZERO-RESULT PIVOT RULE: If your primary OCR reading returns ZERO matching collector, auction, or eBay records in Google Search, you MUST immediately discard that reading and search your alternate glyph permutations AND motif/form-only queries (e.g., "[glaze/color] [motif] [form] signed pottery/glass/silver") until you find documented market records of the actual maker.
+- ZERO-RESULT PIVOT RULE: If your primary OCR reading returns ZERO matching collector, auction, or eBay records, you MUST immediately discard that reading and search your alternate glyph permutations AND motif/form-only queries until you find documented market records of the actual maker.
 - ANTI-HALLUCINATION RULE: If neither mark permutations nor visual motif searches yield a verifiable match, set confidence to "Speculation" and state "I do not know. I do not have enough information." in diagNotes.
 
 STEP 4: REALIZED MARKET COMP RESEARCH (EBAY SOLD / WORTHPOINT / AUCTION ARCHIVES)
@@ -1446,7 +1398,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
   "confidence": "Verified | Strong Theory | Working Theory | Speculation",
   "markTranscription": "Exact character-by-character reading, mark method, and location",
   "alternateReadings": ["Permutation 1", "Permutation 2", "Permutation 3"],
-  "diagNotes": "Detailed forensic breakdown of mark decipherment, construction, authenticity checkpoints, and how live search confirmed the attribution",
+  "diagNotes": "Detailed breakdown of mark decipherment, construction, authenticity checkpoints, and market verification",
   "primaryQuery": "Exact high-volume eBay sold comp search keywords",
   "compPrice": 0.00,
   "buyCost": 0.00,
@@ -1469,26 +1421,21 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       }));
   
       const statusText = document.getElementById('eval-status-text');
-      statusText.textContent = "Selecting highest-precision Gemini Vision model...";
-  
       const candidateModels = await getSupportedGeminiModels(key);
       let lastErr = null;
       let parsed = null;
-      const useGrounding = state.settings.searchGrounding !== false;
-      const useHighRes = state.settings.highResVision !== false;
   
       for (const model of candidateModels) {
-        const configs = [];
-        if (useGrounding && useHighRes) configs.push({ search: true, highRes: true });
-        if (useGrounding) configs.push({ search: true, highRes: false });
-        if (useHighRes) configs.push({ search: false, highRes: true });
-        configs.push({ search: false, highRes: false });
+        const configs = [
+          { search: true, highRes: true },
+          { search: true, highRes: false },
+          { search: false, highRes: true },
+          { search: false, highRes: false }
+        ];
 
         for (const cfg of configs) {
           try {
-            statusText.textContent = cfg.search
-              ? `Inspecting marks & live Search Grounding (${model})...`
-              : `Inspecting marks with Vision OCR (${model})...`;
+            statusText.textContent = "Identifying item, checking maker's marks & recent sold prices...";
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
 
             const genConfig = { temperature: 0.15 };
@@ -1521,7 +1468,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
             if (!resp.ok) {
               const errBody = await resp.json().catch(() => ({}));
               const errMsg = errBody?.error?.message || `HTTP ${resp.status}`;
-              console.warn(`Model ${model} (search=${cfg.search}, highRes=${cfg.highRes}) error: ${errMsg}`);
               lastErr = new Error(errMsg);
               if (resp.status === 429) break;
               continue;
@@ -1530,7 +1476,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
             const resData = await resp.json();
             const candidate = resData?.candidates?.[0];
             const text = candidate?.content?.parts?.map(pt => pt.text || '').join('\n');
-            if (!text) throw new Error("Empty response from AI model");
+            if (!text) throw new Error("Empty response");
   
             let cleanJson = text.trim();
             const fenceMatch = cleanJson.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -1545,15 +1491,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
             }
   
             parsed = JSON.parse(cleanJson);
-            const gMeta = candidate?.groundingMetadata || {};
-            const queries = gMeta.webSearchQueries || [];
-            const chunks = gMeta.groundingChunks || [];
-            parsed._searchGrounded = cfg.search;
-            parsed._modelUsed = model + (cfg.highRes ? ' (High-Res)' : '');
-            parsed._searchQueries = queries;
-            parsed._groundingSources = chunks
-              .filter(c => c.web && c.web.uri)
-              .map(c => ({ title: c.web.title || c.web.uri, uri: c.web.uri }));
             break;
           } catch (e) {
             lastErr = e;
@@ -1562,7 +1499,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
         if (parsed) break;
       }
   
-      if (!parsed) throw lastErr || new Error("Failed to parse AI response");
+      if (!parsed) throw lastErr || new Error("Unable to evaluate item");
   
       const priceMatch = userNotes.match(/(?:asking|cost|buy|pay|price|at)\s*\$?(\d+(?:\.\d{2})?)/i) || userNotes.match(/\$(\d+(?:\.\d{2})?)/);
       if (priceMatch && (!parsed.buyCost || parsed.buyCost === 0)) {
@@ -1571,7 +1508,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
   
       populateItemData(parsed);
       displayQuickResult(parsed);
-      showToast("High-res forensic inspection complete! ✨");
+      showToast("Item evaluation complete! ✨");
     }
   
     // Smart Local Evaluation (notes-only)
@@ -1611,11 +1548,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
         pattern: "",
         dimensions: "",
         visualDesc: "Evaluated from user notes.",
-        conditionDesc: "Inspect physical item for chips, cracks, or wear.",
-        _searchGrounded: false,
-        _modelUsed: "Local Calculator",
-        _searchQueries: [],
-        _groundingSources: []
+        conditionDesc: "Inspect physical item for chips, cracks, or wear."
       };
   
       populateItemData(mockData);
@@ -1682,29 +1615,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       document.getElementById('spec-category').value = data.category || '';
       document.getElementById('studio-diag-notes').value = data.diagNotes || '';
       document.getElementById('studio-condition-desc').value = data.conditionDesc || '';
-
-      document.getElementById('audit-model-badge').textContent = data._modelUsed || 'Gemini Vision';
-      const perms = Array.isArray(data.alternateReadings) && data.alternateReadings.length > 0
-        ? data.alternateReadings.join('  |  ')
-        : (data.markTranscription || 'None recorded');
-      document.getElementById('audit-permutations-val').textContent = perms;
-
-      const queries = Array.isArray(data._searchQueries) && data._searchQueries.length > 0
-        ? data._searchQueries.join('  •  ')
-        : (data._searchGrounded ? 'Live Search Grounding active' : 'Vision-only mode');
-      document.getElementById('audit-queries-val').textContent = queries;
-
-      const srcBox = document.getElementById('audit-sources-container');
-      const srcList = document.getElementById('audit-sources-list');
-      if (Array.isArray(data._groundingSources) && data._groundingSources.length > 0) {
-        srcList.innerHTML = data._groundingSources.slice(0, 6).map(s =>
-          `<li><a href="${s.uri}" target="_blank" class="underline text-[#b8860b] hover:text-[#2c2016]">${s.title}</a></li>`
-        ).join('');
-        srcBox.classList.remove('hidden');
-      } else {
-        srcBox.classList.add('hidden');
-        srcList.innerHTML = '';
-      }
   
       calculateFinancials();
       updateStudio();
@@ -1740,8 +1650,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       compVal.textContent = `$${comp.toFixed(2)}`;
       target3xVal.textContent = `$${m.target3x.toFixed(2)}`;
       profitVal.textContent = `${m.netProfit >= 0 ? '+' : ''}$${m.netProfit.toFixed(2)}`;
-      const groundTag = data._searchGrounded ? ' • 🌐 Search Grounded' : ' • 📷 Vision Only';
-      confPill.textContent = (data.confidence || 'Attributed') + groundTag;
+      confPill.textContent = data.confidence || 'Attributed';
   
       if (buy > 0) {
         if (buy <= m.target3x) {
@@ -1949,7 +1858,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
     </table>
     <h3 style="font-size: 15px; color: #382417; font-family: Georgia, serif;">Condition Disclosure</h3>
     <div style="background-color: #f4f8f3; padding: 12px; border-left: 4px solid #587654; font-size: 13px;">${cond}</div>
-    ${notes ? `<p style="font-size: 12px; color: #587654; margin-top: 12px;"><strong>Forensic Notes:</strong> ${notes}</p>` : ''}
+    ${notes ? `<p style="font-size: 12px; color: #587654; margin-top: 12px;"><strong>Maker &amp; Mark Notes:</strong> ${notes}</p>` : ''}
     <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #b5ccb1; font-size: 11px; color: #587654;">
       <p style="margin: 0;"><strong>Shipping:</strong> Buyer pays shipping. Packed securely with professional bubble wrap and double-wall boxes to guarantee safe arrival.</p>
     </div>
@@ -2116,7 +2025,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
     function renderQueue() {
       const tbody = document.getElementById('queue-table-body');
       const mobileCards = document.getElementById('queue-mobile-cards');
-      const desktopWrap = document.getElementById('queue-desktop-table-wrap');
       const emptyMsg = document.getElementById('queue-empty-msg');
       const badge = document.getElementById('queue-count');
   
@@ -2158,7 +2066,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
   
       emptyMsg.classList.add('hidden');
 
-      // 1. Render Mobile-First Cards (< 768px)
+      // 1. Mobile-First Cards (< 768px)
       mobileCards.innerHTML = filteredWithIdx.map(({ item, idx }) => {
         const isBought = !!item.bought;
         const profitPositive = (item.profit || 0) >= 0;
@@ -2171,7 +2079,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
 
         return `
           <div class="p-3.5 rounded-xl border-2 ${cardBorder} shadow-sm space-y-3">
-            <!-- Top Header: Full-width Title & Status Pill -->
             <div class="space-y-1.5">
               <div class="flex items-center justify-between gap-2">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide border ${verdictBadgeClass}">
@@ -2190,7 +2097,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
               </p>
             </div>
 
-            <!-- Middle 4-Metric Grid (Comp, 3x Limit, Buy Paid, Net Profit) -->
             <div class="grid grid-cols-4 gap-1.5 p-2 rounded-lg bg-[#fdfbf7] border border-[#d3e2d0] font-mono text-center">
               <div>
                 <span class="block text-[9px] font-sans text-[#587654] uppercase">Comp</span>
@@ -2214,7 +2120,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
               </div>
             </div>
 
-            <!-- Bottom Full-Width Thumb-Friendly Action Row -->
             <div class="flex items-center gap-2">
               <button onclick="markQueueItemBought(${idx})" class="flex-1 py-2.5 px-3 ${isBought ? 'bg-emerald-900/90 hover:bg-emerald-800 border border-emerald-500' : 'bg-emerald-800 hover:bg-emerald-700'} text-[#f5f8f4] text-xs font-extrabold rounded-xl shadow-sm active:scale-95 transition flex items-center justify-center gap-1.5">
                 <span>${isBought ? '✏️ Edit Buy ($)' : '💰 Mark Bought ($)'}</span>
@@ -2230,7 +2135,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
         `;
       }).join('');
 
-      // 2. Render Desktop Table (>= 768px)
+      // 2. Desktop Table (>= 768px)
       tbody.innerHTML = filteredWithIdx.map(({ item, idx }) => `
         <tr class="hover:bg-[#f4f8f3] text-[#2c2016] transition">
           <td class="py-2.5 px-3">
@@ -2371,17 +2276,17 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
     });
 
     // ==========================================
-    // SETTINGS PANEL & GEMINI KEY PERSISTENCE
+    // SETTINGS PANEL & API KEY PERSISTENCE
     // ==========================================
     const keyInput = document.getElementById('set-gemini-key');
     const keyBadge = document.getElementById('gemini-key-status');
   
     function updateKeyBadge() {
       if (state.settings.geminiKey) {
-        keyBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#587654]"></span> Gemini High-Res Vision Ready';
+        keyBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#587654]"></span> Scanner Ready';
         keyInput.value = state.settings.geminiKey;
       } else {
-        keyBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#b8860b]"></span> Offline Comp Mode (Set Key in ⚙️)';
+        keyBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#b8860b]"></span> Offline Mode (Add Key in ⚙️)';
       }
     }
   
@@ -2389,7 +2294,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       const val = keyInput.value.trim();
       persistApiKeyEverywhere(val);
       updateKeyBadge();
-      showToast(val ? "Gemini API key locked in permanently! ✨" : "Key cleared");
+      showToast(val ? "API key saved! ✨" : "Key cleared");
     });
 
     const copyMagicUrlBtn = document.getElementById('btn-copy-magic-url');
@@ -2402,7 +2307,7 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
         }
         persistApiKeyEverywhere(val);
         const magicUrl = `${window.location.origin}${window.location.pathname}#key=${encodeURIComponent(val)}`;
-        copyText(magicUrl, "Permanent Auto-Key Bookmark URL copied! Save to phone Home Screen 📱");
+        copyText(magicUrl, "Phone Bookmark URL copied! Add to Home Screen 📱");
       });
     }
   
@@ -2424,8 +2329,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       state.settings.stdShip = parseFloat(document.getElementById('set-std-ship').value) || 8.00;
       state.settings.gdriveWebhook = (document.getElementById('set-gdrive-webhook').value || '').trim();
       state.settings.gdriveAutosync = document.getElementById('set-gdrive-autosync').checked;
-      state.settings.searchGrounding = document.getElementById('set-search-grounding').checked;
-      state.settings.highResVision = document.getElementById('set-high-res-vision').checked;
   
       try {
         localStorage.setItem('yami_settings', JSON.stringify(state.settings));
@@ -2452,14 +2355,6 @@ ${userNotes ? `USER FIELD NOTES: "${userNotes}"\n` : ''}Return ONLY a valid JSON
       const autoSyncCheck = document.getElementById('set-gdrive-autosync');
       if (autoSyncCheck) {
         autoSyncCheck.checked = !!state.settings.gdriveAutosync;
-      }
-      const searchGroundCheck = document.getElementById('set-search-grounding');
-      if (searchGroundCheck) {
-        searchGroundCheck.checked = state.settings.searchGrounding !== false;
-      }
-      const highResCheck = document.getElementById('set-high-res-vision');
-      if (highResCheck) {
-        highResCheck.checked = state.settings.highResVision !== false;
       }
       document.getElementById('set-fee-rate').value = state.settings.feeRate || 13.25;
       document.getElementById('set-std-ship').value = state.settings.stdShip || 8.00;
