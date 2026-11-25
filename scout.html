@@ -117,7 +117,7 @@
         <div id="photo-tray-container" class="rounded-xl border-2 border-dashed border-[#8fad8c]/70 bg-[#f4f8f3] p-3 transition">
           <div id="photo-empty-state" class="text-center py-4 text-xs sm:text-sm text-[#465e43]">
             <p class="font-medium">Point your camera at maker marks, signatures, and the full piece.</p>
-            <p class="text-[11px] text-[#72926d] mt-0.5">Photos compress locally in your browser for fast, low-cost AI analysis.</p>
+            <p class="text-[11px] text-[#72926d] mt-0.5">Select multiple photos at once—all images compress locally in your browser.</p>
           </div>
 
           <div id="photo-tray" class="hidden flex flex-wrap items-center gap-3"></div>
@@ -654,7 +654,7 @@
 
     async function handleFiles(files) {
       if (!files || files.length === 0) return;
-      showToast('Optimizing photos...', '⏳');
+      showToast(`Optimizing ${files.length} photo(s)...`, '⏳');
       for (const file of files) {
         try {
           const c = await compressImage(file, 768, 0.72);
@@ -1225,8 +1225,18 @@ Return ONLY valid JSON (no markdown fences) matching this exact structure:
       const upInp = document.getElementById('photo-upload-input');
       document.getElementById('btn-camera-snap').addEventListener('click', () => camInp.click());
       document.getElementById('btn-photo-upload').addEventListener('click', () => upInp.click());
-      camInp.addEventListener('change', e => { handleFiles(e.target.files); e.target.value = ''; });
-      upInp.addEventListener('change', e => { handleFiles(e.target.files); e.target.value = ''; });
+
+      // Copy live FileList to a static Array BEFORE clearing input value so batch selection processes all files
+      camInp.addEventListener('change', e => {
+        const picked = Array.from(e.target.files || []);
+        e.target.value = '';
+        handleFiles(picked);
+      });
+      upInp.addEventListener('change', e => {
+        const picked = Array.from(e.target.files || []);
+        e.target.value = '';
+        handleFiles(picked);
+      });
 
       document.getElementById('btn-clear-photos').addEventListener('click', () => {
         state.photos = [];
