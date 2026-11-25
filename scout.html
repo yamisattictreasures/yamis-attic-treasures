@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yami's Attic Treasures — Sourcing Scout v4.1 Live</title>
+  <title>Yami's Attic Treasures — Sourcing Scout v4.2 Live</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,7 +60,7 @@
           </p>
         </div>
         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#222e23] text-[#d3e2d0] border border-[#587654] font-mono">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>v4.1 Live
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>v4.2 Live
         </span>
       </div>
 
@@ -82,7 +82,7 @@
   </header>
 
   <!-- Toast -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none bg-[#172217] border-2 border-[#8fad8c] text-[#f5f8f4] px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none bg-[#172217] border-2 border-[#8fad8c] text-[#f5f8f4] px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-md">
     <span id="toast-icon">✅</span>
     <span id="toast-msg" class="text-sm font-semibold">Ready</span>
   </div>
@@ -601,7 +601,7 @@
       toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-20');
       setTimeout(() => {
         toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-20');
-      }, 3000);
+      }, 4500);
     }
 
     function switchTab(tabId) {
@@ -769,6 +769,43 @@
       window.open('https://lens.google.com/', '_blank');
     };
 
+    // Dynamically discover ONLY active, low-cost Flash models enabled for this API key (never Pro or deprecated models)
+    async function discoverActiveFlashModels(key) {
+      try {
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data && Array.isArray(data.models)) {
+            const validFlash = data.models
+              .filter(m => {
+                const methods = m.supportedGenerationMethods || [];
+                const n = m.name.toLowerCase();
+                return methods.includes('generateContent') &&
+                       n.includes('flash') &&
+                       !n.includes('pro') &&
+                       !n.includes('lite') &&
+                       !n.includes('audio') &&
+                       !n.includes('tts') &&
+                       !n.includes('image') &&
+                       !n.includes('thinking') &&
+                       !n.includes('computer');
+              })
+              .map(m => m.name.replace(/^models\//, ''));
+
+            // Sort newest generation first (e.g. gemini-3.8-flash, gemini-3.5-flash, gemini-3-flash-preview, gemini-flash-latest)
+            validFlash.sort((a, b) => b.localeCompare(a));
+            if (validFlash.length > 0) {
+              console.log('Active Flash models for key:', validFlash);
+              return validFlash;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Model discovery failed, using current Flash defaults:', e);
+      }
+      return ['gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-3.5-flash-lite'];
+    }
+
     async function runGeminiVisionAnalysis(key, userNotes) {
       const prompt = `You are the master vintage authenticator, antique appraiser, and eBay arbitrage analyst for Yami's Attic Treasures.
 Analyze the provided photo(s) and user notes ("${userNotes || 'None'}") using our forensic identification protocol:
@@ -801,10 +838,11 @@ Return ONLY valid JSON (no markdown fences) matching this exact structure:
         inlineData: { mimeType: p.type || 'image/jpeg', data: p.base64 }
       }));
 
-      const models = ['gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-2.5-flash-lite'];
-      const useGrounding = document.getElementById('toggle-web-grounding')?.checked ?? true;
       const statusText = document.getElementById('eval-status-text');
-      let lastErr = null;
+      statusText.textContent = 'Checking active Gemini Flash models...';
+      const models = await discoverActiveFlashModels(key);
+      const useGrounding = document.getElementById('toggle-web-grounding')?.checked ?? true;
+      let firstErr = null;
 
       for (const model of models) {
         const controller = new AbortController();
@@ -832,6 +870,7 @@ Return ONLY valid JSON (no markdown fences) matching this exact structure:
           });
           clearTimeout(timer);
 
+          // If grounding fails on this model, immediately retry pure JSON vision on the same model
           if (!resp.ok && useGrounding) {
             delete payload.tools;
             payload.generationConfig.responseMimeType = 'application/json';
@@ -845,9 +884,10 @@ Return ONLY valid JSON (no markdown fences) matching this exact structure:
           if (!resp.ok) {
             const errJson = await resp.json().catch(() => ({}));
             const msg = errJson?.error?.message || ('HTTP ' + resp.status);
-            lastErr = new Error(msg);
-            if (msg.toLowerCase().includes('spend cap') || msg.toLowerCase().includes('billing')) {
-              throw lastErr;
+            console.warn(`Model ${model} failed:`, msg);
+            if (!firstErr) firstErr = new Error(`${model}: ${msg}`);
+            if (msg.toLowerCase().includes('spend cap') || msg.toLowerCase().includes('billing') || msg.toLowerCase().includes('api key not valid')) {
+              throw new Error(msg);
             }
             continue;
           }
@@ -871,13 +911,13 @@ Return ONLY valid JSON (no markdown fences) matching this exact structure:
           return;
         } catch (err) {
           clearTimeout(timer);
-          lastErr = err;
+          if (!firstErr) firstErr = err;
           if (err.message && (err.message.toLowerCase().includes('spend cap') || err.message.toLowerCase().includes('api key'))) {
             throw err;
           }
         }
       }
-      throw lastErr || new Error('All models timed out or failed.');
+      throw firstErr || new Error('All Flash models failed.');
     }
 
     function runLocalEvaluation(notes) {
@@ -924,7 +964,7 @@ Return ONLY valid JSON (no markdown fences) matching this exact structure:
           runLocalEvaluation(notes);
         }
       } catch (err) {
-        showToast('Error: ' + err.message.substring(0, 70), '⚠️');
+        showToast('Error: ' + err.message.substring(0, 110), '⚠️');
       } finally {
         statusBox.classList.add('hidden');
         evalBtn.disabled = false;
@@ -1226,7 +1266,6 @@ Return ONLY valid JSON (no markdown fences) matching this exact structure:
       document.getElementById('btn-camera-snap').addEventListener('click', () => camInp.click());
       document.getElementById('btn-photo-upload').addEventListener('click', () => upInp.click());
 
-      // Copy live FileList to a static Array BEFORE clearing input value so batch selection processes all files
       camInp.addEventListener('change', e => {
         const picked = Array.from(e.target.files || []);
         e.target.value = '';
