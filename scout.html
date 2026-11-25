@@ -117,13 +117,13 @@
         const section = document.getElementById(`tab-${t}`);
         const btn = document.getElementById(`tab-${t}-btn`);
         if (t === tabId) {
-          section.classList.remove('hidden');
-          btn.classList.add('bg-gradient-to-r', 'from-[#c59b27]', 'via-[#e2be58]', 'to-[#c59b27]', 'text-[#1c140c]', 'shadow', 'font-bold');
-          btn.classList.remove('text-[#d3e2d0]');
+          if (section) section.classList.remove('hidden');
+          if (btn) btn.classList.add('bg-gradient-to-r', 'from-[#c59b27]', 'via-[#e2be58]', 'to-[#c59b27]', 'text-[#1c140c]', 'shadow', 'font-bold');
+          if (btn) btn.classList.remove('text-[#d3e2d0]');
         } else {
-          section.classList.add('hidden');
-          btn.classList.remove('bg-gradient-to-r', 'from-[#c59b27]', 'via-[#e2be58]', 'to-[#c59b27]', 'text-[#1c140c]', 'shadow', 'font-bold');
-          btn.classList.add('text-[#d3e2d0]');
+          if (section) section.classList.add('hidden');
+          if (btn) btn.classList.remove('bg-gradient-to-r', 'from-[#c59b27]', 'via-[#e2be58]', 'to-[#c59b27]', 'text-[#1c140c]', 'shadow', 'font-bold');
+          if (btn) btn.classList.add('text-[#d3e2d0]');
         }
       });
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -131,8 +131,11 @@
 
     function showToast(msg, icon = '✅') {
       const toast = document.getElementById('toast');
-      document.getElementById('toast-icon').textContent = icon;
-      document.getElementById('toast-msg').textContent = msg;
+      if (!toast) return;
+      const iconEl = document.getElementById('toast-icon');
+      const msgEl = document.getElementById('toast-msg');
+      if (iconEl) iconEl.textContent = icon;
+      if (msgEl) msgEl.textContent = msg;
       toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-20');
       setTimeout(() => {
         toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-20');
@@ -179,6 +182,132 @@
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
+    }
+
+    async function handleFiles(files) {
+      if (!files || files.length === 0) return;
+      showToast("Processing images...", "📸");
+      for (const file of files) {
+        try {
+          const compressed = await compressImage(file, 768, 0.72);
+          state.photos.push(compressed);
+        } catch (err) {
+          showToast(`Image error: ${err.message}`, "⚠️");
+        }
+      }
+      renderPhotoTray();
+      showToast(`Added ${files.length} photo(s)!`, "✅");
+    }
+
+    function renderPhotoTray() {
+      const tray = document.getElementById('photo-tray');
+      const countBadge = document.getElementById('photo-count-badge');
+      if (countBadge) countBadge.textContent = `${state.photos.length} Photo${state.photos.length !== 1 ? 's' : ''}`;
+      if (!tray) return;
+      if (state.photos.length === 0) {
+        tray.innerHTML = `<div class="text-center py-6 text-[#778c74] font-medium text-sm">No photos added yet. Snap a picture or upload files to analyze.</div>`;
+        return;
+      }
+      tray.innerHTML = state.photos.map((p, idx) => `
+        <div class="relative group rounded-xl overflow-hidden border-2 border-[#8fad8c] shadow-sm bg-[#141a15] aspect-square">
+          <img src="${p.dataUrl}" alt="Photo ${idx + 1}" class="w-full h-full object-cover" />
+          <button onclick="removePhoto(${idx})" class="absolute top-1 right-1 bg-rose-900/90 text-rose-100 hover:bg-rose-700 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow transition" title="Remove Photo">✕</button>
+          <button onclick="openGoogleLens(${idx})" class="absolute bottom-1 right-1 bg-[#c59b27]/90 text-[#1c140c] hover:bg-[#e2be58] px-2 py-0.5 rounded-md text-[10px] font-bold shadow transition flex items-center gap-1" title="Search Lens">🔍 Lens</button>
+        </div>
+      `).join('');
+    }
+
+    window.removePhoto = function(idx) {
+      state.photos.splice(idx, 1);
+      renderPhotoTray();
+      showToast("Photo removed");
+    };
+
+    function dataUrlToPngBlob(dataUrl) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((blob) => resolve(blob), 'image/png');
+        };
+        img.src = dataUrl;
+      });
+    }
+
+    function createMultiPhotoBlob(photos) {
+      return new Promise((resolve) => {
+        if (!photos || photos.length === 0) return resolve(null);
+        if (photos.length === 1) {
+          return dataUrlToPngBlob(photos[0].dataUrl).then(resolve);
+        }
+        const loadedImages = [];
+        let loadedCount = 0;
+        photos.forEach((p, idx) => {
+          const img = new Image();
+          img.onload = () => {
+            loadedImages[idx] = img;
+            loadedCount++;
+            if (loadedCount === photos.length) {
+              const totalWidth = loadedImages.reduce((sum, im) => sum + im.width, 0);
+              const maxHeight = Math.max(...loadedImages.map(im => im.height));
+              const canvas = document.createElement('canvas');
+              canvas.width = totalWidth;
+              canvas.height = maxHeight;
+              const ctx = canvas.getContext('2d');
+              let currentX = 0;
+              loadedImages.forEach((im) => {
+                ctx.drawImage(im, currentX, 0);
+                currentX += im.width;
+              });
+              canvas.toBlob((blob) => resolve(blob), 'image/png');
+            }
+          };
+          img.src = p.dataUrl;
+        });
+      });
+    }
+
+    function downloadPhotoFallback(dataUrl, filename) {
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = filename || 'lens_stitch.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    async function openGoogleLens(photoIndex = null) {
+      const targetPhotos = (photoIndex !== null && state.photos[photoIndex])
+        ? [state.photos[photoIndex]]
+        : state.photos;
+      if (targetPhotos.length === 0) {
+        showToast("Snap or upload a photo first!", "⚠️");
+        return;
+      }
+      showToast("Stitching images for Google Lens...", "🔍");
+      try {
+        const pngBlob = await createMultiPhotoBlob(targetPhotos);
+        if (!pngBlob) throw new Error("Could not process image");
+        if (navigator.clipboard && window.ClipboardItem) {
+          try {
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+            showToast("Stitched photo copied! Paste in Lens tab.", "📋");
+          } catch (clipErr) {
+            downloadPhotoFallback(targetPhotos[0].dataUrl, 'lens_photo.png');
+            showToast("Photo downloaded! Upload to Google Lens.", "📥");
+          }
+        } else {
+          downloadPhotoFallback(targetPhotos[0].dataUrl, 'lens_photo.png');
+          showToast("Photo downloaded! Upload to Google Lens.", "📥");
+        }
+        window.open('https://lens.google.com/', '_blank');
+      } catch (err) {
+        showToast(`Lens error: ${err.message}`, "⚠️");
+      }
     }
 
     async function getSupportedGeminiModels() {
@@ -284,47 +413,147 @@ Return your final output as a pure JSON object conforming to this schema:
     }
 
     function applyEvaluationData(data) {
-      state.current = { ...state.current, ...data };
-      document.getElementById('quick-result-card').classList.remove('hidden');
-      document.getElementById('result-item-name').textContent = data.itemName || "Evaluated Item";
-      document.getElementById('result-maker-val').textContent = data.maker || "Unknown";
-      document.getElementById('result-comp-val').textContent = `$${(data.compPrice || 0).toFixed(2)}`;
-      calculateFinancials();
+      populateItemData(data);
+      displayQuickResult(data);
       switchTab('studio');
       showToast("Evaluation complete!", "⚡");
     }
 
+    function populateItemData(data) {
+      state.current = { ...state.current, ...data };
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+      setVal('input-item-name', data.itemName);
+      setVal('input-maker', data.maker);
+      setVal('input-confidence', data.confidence || 'Verified');
+      setVal('input-comp-price', data.compPrice ? parseFloat(data.compPrice).toFixed(2) : '0.00');
+      setVal('input-buy-cost', data.buyCost ? parseFloat(data.buyCost).toFixed(2) : '0.00');
+      setVal('input-ship-tier', data.shipTier || 'standard');
+      setVal('input-ship-charged', data.shipCharged ? parseFloat(data.shipCharged).toFixed(2) : '8.00');
+      setVal('spec-brand', data.maker);
+      setVal('spec-era', data.era);
+      setVal('spec-material', data.material);
+      setVal('spec-dimensions', data.dimensions);
+      setVal('spec-category', data.category);
+      setVal('studio-diag-notes', data.diagNotes);
+      setVal('studio-condition-desc', data.conditionDesc);
+      updateSEOTitleAndHTML();
+      calculateFinancials();
+    }
+
+    function displayQuickResult(data) {
+      const card = document.getElementById('quick-result-card');
+      if (card) card.classList.remove('hidden');
+      const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+      setText('result-item-name', data.itemName || 'Evaluated Item');
+      setText('result-maker-val', data.maker || 'Unknown');
+      setText('result-[#result-era-val]', data.era || 'Vintage');
+      setText('result-era-val', data.era || 'Vintage');
+      const comp = parseFloat(data.compPrice) || 0;
+      const buy = parseFloat(data.buyCost) || 0;
+      const target3x = comp / 3.0;
+      setText('result-comp-price-head', `$${comp.toFixed(2)}`);
+      setText('result-comp-val', `$${comp.toFixed(2)}`);
+      setText('result-target3x-val', `$${target3x.toFixed(2)}`);
+      let verdictPill = document.getElementById('result-verdict-pill');
+      let ruleText = document.getElementById('result-rule-text');
+      if (verdictPill && ruleText) {
+        if (buy > 0) {
+          if (buy <= target3x) {
+            verdictPill.textContent = '🟢 STRONG BUY (3x+)';
+            verdictPill.className = 'px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-900 border-2 border-emerald-600 shadow-sm';
+            ruleText.textContent = `Asking $${buy.toFixed(2)} is under $${target3x.toFixed(2)} 3x limit. Excellent profit margin!`;
+          } else if (buy <= comp / 2.0) {
+            verdictPill.textContent = '🟡 MODERATE BUY (2x)';
+            verdictPill.className = 'px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-amber-100 text-amber-900 border-2 border-amber-600 shadow-sm';
+            ruleText.textContent = `Asking $${buy.toFixed(2)} yields 2x return vs $${comp.toFixed(2)} comp. Good for estate sales.`;
+          } else {
+            verdictPill.textContent = '🔴 MARGIN TOO SLIM';
+            verdictPill.className = 'px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-rose-100 text-rose-900 border-2 border-rose-600 shadow-sm';
+            ruleText.textContent = `Asking $${buy.toFixed(2)} exceeds 2x limit ($${(comp/2).toFixed(2)}). Offer less!`;
+          }
+        } else {
+          verdictPill.textContent = '🟢 GOOD BUY RULE';
+          verdictPill.className = 'px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#e8f0e6] text-[#2c3d2a] border-2 border-[#587654] shadow-sm';
+          ruleText.textContent = `Buy if price is under $${target3x.toFixed(2)} for 3x return. Comps average $${comp.toFixed(2)}.`;
+        }
+      }
+      const query = encodeURIComponent(data.primaryQuery || data.itemName || '');
+      const imgLink = document.getElementById('btn-quick-images');
+      const teraLink = document.getElementById('btn-quick-terapeak');
+      const soldLink = document.getElementById('btn-quick-sold');
+      if (imgLink) imgLink.href = `https://www.google.com/search?tbm=isch&q=${query}`;
+      if (teraLink) teraLink.href = `https://www.ebay.com/sh/research?keywords=${query}`;
+      if (soldLink) soldLink.href = `https://www.ebay.com/sch/i.html?_nkw=${query}&LH_Sold=1&LH_Complete=1`;
+    }
+
     function calculateFinancials() {
-      const comp = parseFloat(document.getElementById('input-comp-price')?.value) || state.current.compPrice || 0;
-      const buy = parseFloat(document.getElementById('input-buy-cost')?.value) || state.current.buyCost || 0;
-      const shipCharged = parseFloat(document.getElementById('input-ship-charged')?.value) || 8.00;
+      const getNum = (id) => parseFloat(document.getElementById(id)?.value) || 0;
+      const comp = getNum('input-comp-price') || state.current.compPrice || 0;
+      const buy = getNum('input-buy-cost') || state.current.buyCost || 0;
+      const shipCharged = getNum('input-ship-charged') || 8.00;
       const feeRate = (state.settings.feeRate || 13.25) / 100;
-      
       const gross = comp + shipCharged;
       const fee = (gross * feeRate) + 0.40;
       const netPayout = gross - fee - shipCharged;
       const profit = netPayout - buy;
+      const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+      setText('calc-gross', `$${gross.toFixed(2)}`);
+      setText('calc-ebay-fee', `-$${fee.toFixed(2)}`);
+      setText('calc-net-payout', `$${netPayout.toFixed(2)}`);
+      setText('calc-est-profit', `${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`);
+      setText('limit-3x-display', `$${(comp / 3.0).toFixed(2)}`);
+      setText('limit-2x-display', `$${(comp / 2.0).toFixed(2)}`);
+    }
 
-      if (document.getElementById('calc-gross')) document.getElementById('calc-gross').textContent = `$${gross.toFixed(2)}`;
-      if (document.getElementById('calc-ebay-fee')) document.getElementById('calc-ebay-fee').textContent = `-$${fee.toFixed(2)}`;
-      if (document.getElementById('calc-net-payout')) document.getElementById('calc-net-payout').textContent = `$${netPayout.toFixed(2)}`;
-      if (document.getElementById('calc-est-profit')) document.getElementById('calc-est-profit').textContent = `${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`;
+    function updateSEOTitleAndHTML() {
+      const getVal = (id) => document.getElementById(id)?.value || '';
+      const name = getVal('input-item-name');
+      const maker = getVal('input-maker');
+      const era = getVal('spec-era');
+      const material = getVal('spec-material');
+      let rawTitle = `${era} ${maker} ${name} ${material}`.replace(/\s+/g, ' ').trim();
+      if (rawTitle.length > 80) rawTitle = rawTitle.substring(0, 80);
+      const titleInput = document.getElementById('studio-title-input');
+      const charCount = document.getElementById('title-char-count');
+      if (titleInput) titleInput.value = rawTitle;
+      if (charCount) charCount.textContent = `${rawTitle.length} / 80`;
+      const html = `<div style="font-family: Arial, sans-serif; max-w-3xl; margin: auto; padding: 20px; border: 2px solid #587654; border-radius: 12px; background: #fdfbf7;">
+  <h2 style="color: #2c2016; font-size: 20px; border-bottom: 2px solid #c59b27; padding-bottom: 8px;">${rawTitle}</h2>
+  <p style="color: #587654; font-size: 14px;"><strong>Maker:</strong> ${maker} | <strong>Era:</strong> ${era} | <strong>Material:</strong> ${material}</p>
+  <div style="background: #f4f8f3; padding: 15px; border-radius: 8px; margin: 15px 0;">
+    <h3 style="color: #2c2016; font-size: 16px; margin-top: 0;">Item Description & History</h3>
+    <p style="color: #2c2016; font-size: 13px; line-height: 1.5;">${state.current.visualDesc || 'Curated vintage piece from Yami\'s Attic Treasures.'}</p>
+  </div>
+  <div style="background: #fff; border: 1px solid #d3e2d0; padding: 15px; border-radius: 8px;">
+    <h4 style="color: #587654; font-size: 14px; margin-top: 0;">Condition Disclosure</h4>
+    <p style="color: #2c2016; font-size: 13px;">${getVal('studio-condition-desc') || 'Good vintage condition with age-appropriate wear.'}</p>
+  </div>
+</div>`;
+      const preview = document.getElementById('html-rendered-preview');
+      const rawCode = document.getElementById('html-raw-code');
+      if (preview) preview.innerHTML = html;
+      if (rawCode) rawCode.value = html;
+    }
+
+    function updateStudio() {
+      updateSEOTitleAndHTML();
+      calculateFinancials();
     }
 
     function renderQueue() {
       const tbody = document.getElementById('queue-table-body');
       const emptyMsg = document.getElementById('queue-empty-msg');
+      const countEl = document.getElementById('queue-count');
+      if (countEl) countEl.textContent = state.queue.length;
       if (!tbody) return;
-
       if (state.queue.length === 0) {
         tbody.innerHTML = '';
         if (emptyMsg) emptyMsg.classList.remove('hidden');
         return;
       }
-
       if (emptyMsg) emptyMsg.classList.add('hidden');
       tbody.innerHTML = state.queue.map((item, idx) => `
-        <tr class="border-b border-[#d3e2d0] hover:bg-[#f4f8f3]"><td class="py-2.5 px-3 font-bold text-[#2c2016]">${item.itemName}</td><td class="py-2.5 px-3">${item.maker}</td><td class="py-2.5 px-3 font-mono">$${(item.compPrice || 0).toFixed(2)}</td><td class="py-2.5 px-3 font-mono">$${(item.buyCost || 0).toFixed(2)}</td><td class="py-2.5 px-3 font-mono text-emerald-700 font-bold">+$${(item.profit || 0).toFixed(2)}</td><td class="py-2.5 px-3 font-mono">$${((item.compPrice || 0) / 3).toFixed(2)}</td><td class="py-2.5 px-3 text-right"><button onclick="removeFromQueue(${idx})" class="text-rose-700 hover:text-rose-900 font-bold">Remove</button></td></tr>
+        <tr class="border-b border-[#d3e2d0] hover:bg-[#f4f8f3]"><td class="py-2.5 px-3 font-bold text-[#2c2016]">${item.itemName || item.name}</td><td class="py-2.5 px-3">${item.maker}</td><td class="py-2.5 px-3 font-mono">$${(parseFloat(item.compPrice || item.comp) || 0).toFixed(2)}</td><td class="py-2.5 px-3 font-mono">$${(parseFloat(item.buyCost || item.buy) || 0).toFixed(2)}</td><td class="py-2.5 px-3 font-mono text-emerald-700 font-bold">+$${(parseFloat(item.profit) || 0).toFixed(2)}</td><td class="py-2.5 px-3 font-mono">$${((parseFloat(item.compPrice || item.comp) || 0) / 3).toFixed(2)}</td><td class="py-2.5 px-3 text-right"><button onclick="removeFromQueue(${idx})" class="text-rose-700 hover:text-rose-900 font-bold">Remove</button></td></tr>
       `).join('');
     }
 
@@ -335,332 +564,44 @@ Return your final output as a pure JSON object conforming to this schema:
       showToast("Item removed from queue");
     };
 
-    async function evaluateFindWrapper() {
-      const notes = (document.getElementById('scout-notes-input').value || '').trim();
-      const statusBox = document.getElementById('eval-status-box');
-      const evalBtn = document.getElementById('btn-evaluate');
-      const rawKey = state.settings.geminiKey || localStorage.getItem('yamis_gemini_api_key') || '';
-
-      if (state.photos.length === 0 && !notes) {
-        showToast("Snap a photo or add notes first!", "⚠️");
-        return;
-      }
-
-      if (state.photos.length > 0 && !rawKey) {
-        showToast("Gemini API Key Required! Set in Settings ⚙️", "⚠️");
-        switchTab('settings');
-        return;
-      }
-
-      statusBox.classList.remove('hidden');
-      evalBtn.disabled = true;
-
-      try {
-        await runGeminiVisionAnalysis(rawKey, notes);
-      } catch (err) {
-        showToast(`Evaluation Error: ${err.message}`, "⚠️");
-      } finally {
-        statusBox.classList.add('hidden');
-        evalBtn.disabled = false;
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('btn-evaluate')?.addEventListener('click', evaluateFindWrapper);
-      document.getElementById('btn-save-key')?.addEventListener('click', () => {
-        const k = document.getElementById('set-gemini-key').value.trim();
-        state.settings.geminiKey = k;
-        localStorage.setItem('yamis_gemini_api_key', k);
-        localStorage.setItem('yami_settings', JSON.stringify(state.settings));
-        showToast("Gemini Key Saved!", "⚙️");
-      });
-      renderQueue();
-    });
-  </script></body></html>
-            if (resp.status === 429 || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted')) {
-              console.warn(`Model ${model} rate-limited (429), trying fallback model...`);
-              lastErr = new Error("Google free-tier rate limit reached. Please wait 30-60s or create a fresh free key in Google AI Studio.");
-              continue;
-            }
-            throw new Error(errMsg);
-          }
-
-          const resData = await resp.json();
-          const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (!text) throw new Error("Empty response from AI model");
-
-          let cleanJson = text.trim();
-          const jsonMatch = cleanJson.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-          if (jsonMatch) cleanJson = jsonMatch[1].trim();
-
-          parsed = JSON.parse(cleanJson);
-          console.log(`Successfully identified item using model: ${model}`);
-          break;
-        } catch (e) {
-          lastErr = e;
-          if (e.message.includes("quota")) {
-            break;
-          }
-        }
-      }
-
-      if (!parsed) throw lastErr || new Error("Failed to parse AI response");
-
-      // Extract user notes if buy cost was specified
-      const priceMatch = userNotes.match(/(?:asking|cost|buy|pay|price|at)\s*\$?(\d+(?:\.\d{2})?)/i);
-      if (priceMatch && (!parsed.buyCost || parsed.buyCost === 0)) {
-        parsed.buyCost = parseFloat(priceMatch[1]);
-      }
-
-      populateItemData(parsed);
-      displayQuickResult(parsed);
-      showToast("Item analyzed with Live Gemini Vision! ✨");
-    }
-
-    // Smart Local Evaluation (when no key or offline)
-    function runLocalEvaluation(notes, notePrefix = '') {
-      let comp = 48.00;
-      let buy = 0.00;
-      let name = "Vintage Handcrafted Art Glass / Ceramic Piece";
-      let maker = "Attributed Studio Artist";
-
-      const priceMatch = (notes || '').match(/(?:asking|cost|buy|pay|price|at)\s*\$?(\d+(?:\.\d{2})?)/i);
-      if (priceMatch) {
-        buy = parseFloat(priceMatch[1]);
-      } else {
-        const anyNumber = (notes || '').match(/\$?(\d+(?:\.\d{2})?)/);
-        if (anyNumber) buy = parseFloat(anyNumber[1]);
-      }
-      const res = {
-        itemName: name,
-        maker: maker,
-        confidence: "Working Theory",
-        diagNotes: notes || "Manual appraisal based on asking price.",
-        primaryQuery: name,
-        compPrice: comp,
-        buyCost: buy,
-        shipCharged: 8.00,
-        shipTier: "standard",
-        category: "Collectibles",
-        era: "Mid-Century",
-        material: "Art Glass / Ceramics",
-        pattern: "Vintage Craftsmanship",
-        dimensions: "Standard",
-        visualDesc: "A fine vintage piece with distinctive period characteristics.",
-        conditionDesc: "Good vintage condition consistent with age."
-      };
-      populateItemData(res);
-      displayQuickResult(res);
-    }
-    function populateItemData(data) {
-      state.current = { ...state.current, ...data };
-      document.getElementById('input-item-name').value = data.itemName || '';
-      document.getElementById('input-maker').value = data.maker || '';
-      document.getElementById('input-confidence').value = data.confidence || 'Verified';
-      document.getElementById('input-comp-price').value = data.compPrice ? data.compPrice.toFixed(2) : '0.00';
-      document.getElementById('input-buy-cost').value = data.buyCost ? data.buyCost.toFixed(2) : '0.00';
-      document.getElementById('input-ship-tier').value = data.shipTier || 'standard';
-      document.getElementById('input-ship-charged').value = data.shipCharged ? data.shipCharged.toFixed(2) : '8.00';
-      document.getElementById('spec-brand').value = data.maker || '';
-      document.getElementById('spec-era').value = data.era || '';
-      document.getElementById('spec-material').value = data.material || '';
-      document.getElementById('spec-dimensions').value = data.dimensions || '';
-      document.getElementById('spec-category').value = data.category || '';
-      document.getElementById('studio-diag-notes').value = data.diagNotes || '';
-      document.getElementById('studio-condition-desc').value = data.conditionDesc || '';
-      updateSEOTitleAndHTML();
-      calculateFinancials();
-    }
-    function displayQuickResult(data) {
-      const card = document.getElementById('quick-result-card');
-      card.classList.remove('hidden');
-      document.getElementById('result-item-name').textContent = data.itemName || 'Vintage Item';
-      document.getElementById('result-maker-val').textContent = data.maker || 'Unknown Maker';
-      document.getElementById('result-era-val').textContent = data.era || 'Vintage';
-      document.getElementById('result-confidence-pill').textContent = data.confidence || 'Attributed';
-      const comp = data.compPrice || 0;
-      const buy = data.buyCost || 0;
-      const target3x = comp / 3.0;
-      document.getElementById('result-comp-price-head').textContent = `$${comp.toFixed(2)}`;
-      document.getElementById('result-comp-val').textContent = `$${comp.toFixed(2)}`;
-      document.getElementById('result-target3x-val').textContent = `$${target3x.toFixed(2)}`;
-      let verdictPill = document.getElementById('result-verdict-pill');
-      let ruleText = document.getElementById('result-rule-text');
-      if (buy > 0) {
-        if (buy <= target3x) {
-          verdictPill.textContent = '🟢 STRONG BUY (3x+)';
-          verdictPill.className = 'px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-900 border-2 border-emerald-600 shadow-sm';
-          ruleText.textContent = `Asking $${buy.toFixed(2)} is under $${target3x.toFixed(2)} 3x limit. Excellent profit margin!`;
-        } else if (buy <= comp / 2.0) {
-          verdictPill.textContent = '🟡 MODERATE BUY (2x)';
-          verdictPill.className = 'px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-amber-100 text-amber-900 border-2 border-amber-600 shadow-sm';
-          ruleText.textContent = `Asking $${buy.toFixed(2)} yields 2x return vs $${comp.toFixed(2)} comp. Good for estate sales.`;
-        } else {
-          verdictPill.textContent = '🔴 MARGIN TOO SLIM';
-          verdictPill.className = 'px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-rose-100 text-rose-900 border-2 border-rose-600 shadow-sm';
-          ruleText.textContent = `Asking $${buy.toFixed(2)} exceeds 2x limit ($${(comp/2).toFixed(2)}). Offer less!`;
-        }
-      } else {
-        verdictPill.textContent = '🟢 GOOD BUY RULE';
-        verdictPill.className = 'px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#e8f0e6] text-[#2c3d2a] border-2 border-[#587654] shadow-sm';
-        ruleText.textContent = `Buy if price is under $${target3x.toFixed(2)} for 3x return. Comps average $${comp.toFixed(2)}.`;
-      }
-      const query = encodeURIComponent(data.primaryQuery || data.itemName || '');
-      document.getElementById('btn-quick-images').href = `https://www.google.com/search?tbm=isch&q=${query}`;
-      document.getElementById('btn-quick-terapeak').href = `https://www.ebay.com/sh/research?keywords=${query}`;
-      document.getElementById('btn-quick-sold').href = `https://www.ebay.com/sch/i.html?_nkw=${query}&LH_Sold=1&LH_Complete=1`;
-    }
-    function updateSEOTitleAndHTML() {
-      const name = document.getElementById('input-item-name').value || '';
-      const maker = document.getElementById('input-maker').value || '';
-      const era = document.getElementById('spec-era').value || '';
-      const material = document.getElementById('spec-material').value || '';
-      let rawTitle = `${era} ${maker} ${name} ${material}`.replace(/\s+/g, ' ').trim();
-      if (rawTitle.length > 80) rawTitle = rawTitle.substring(0, 80);
-      document.getElementById('studio-title-input').value = rawTitle;
-      document.getElementById('title-char-count').textContent = `${rawTitle.length} / 80`;
-      const html = `<div style="font-family: Arial, sans-serif; max-w-3xl; margin: auto; padding: 20px; border: 2px solid #587654; border-radius: 12px; background: #fdfbf7;">
-  <h2 style="color: #2c2016; font-size: 20px; border-bottom: 2px solid #c59b27; padding-bottom: 8px;">${rawTitle}</h2>
-  <p style="color: #587654; font-size: 14px;"><strong>Maker:</strong> ${maker} | <strong>Era:</strong> ${era} | <strong>Material:</strong> ${material}</p>
-  <div style="background: #f4f8f3; padding: 15px; border-radius: 8px; margin: 15px 0;">
-    <h3 style="color: #2c2016; font-size: 16px; margin-top: 0;">Item Description & History</h3>
-    <p style="color: #2c2016; font-size: 13px; line-height: 1.5;">${state.current.visualDesc || 'Curated vintage piece from Yami\'s Attic Treasures.'}</p>
-  </div>
-  <div style="background: #fff; border: 1px solid #d3e2d0; padding: 15px; border-radius: 8px;">
-    <h4 style="color: #587654; font-size: 14px; margin-top: 0;">Condition Disclosure</h4>
-    <p style="color: #2c2016; font-size: 13px;">${document.getElementById('studio-condition-desc').value || 'Good vintage condition with age-appropriate wear.'}</p>
-  </div>
-</div>`;
-      document.getElementById('html-rendered-preview').innerHTML = html;
-      document.getElementById('html-raw-code').value = html;
-    }
-    function calculateFinancials() {
-      const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
-      const buy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
-      const shipCharged = parseFloat(document.getElementById('input-ship-charged').value) || 0;
-      const tier = document.getElementById('input-ship-tier').value;
-      const shipOut = tier === 'fragile' ? (state.settings.fragShip + state.settings.fragPack) : (state.settings.stdShip + state.settings.stdPack);
-      const gross = comp + shipCharged;
-      const ebayFee = (gross * (state.settings.feeRate / 100)) + 0.40;
-      const netPayout = gross - ebayFee - shipOut;
-      const profit = netPayout - buy;
-      document.getElementById('calc-gross').textContent = `$${gross.toFixed(2)}`;
-      document.getElementById('calc-ebay-fee').textContent = `-$${ebayFee.toFixed(2)}`;
-      document.getElementById('calc-ship-out').textContent = `-$${shipOut.toFixed(2)}`;
-      document.getElementById('calc-net-payout').textContent = `$${netPayout.toFixed(2)}`;
-      document.getElementById('calc-est-profit').textContent = `${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`;
-      document.getElementById('limit-3x-display').textContent = `$${(comp / 3.0).toFixed(2)}`;
-      document.getElementById('limit-2x-display').textContent = `$${(comp / 2.0).toFixed(2)}`;
-    }
-    ['input-item-name', 'input-maker', 'input-comp-price', 'input-buy-cost', 'input-ship-charged', 'input-ship-tier', 'studio-condition-desc'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', () => {
-          calculateFinancials();
-          updateSEOTitleAndHTML();
-        });
-      }
-    });
-    document.getElementById('btn-copy-title').addEventListener('click', () => {
-      copyText(document.getElementById('studio-title-input').value, "eBay Title copied! 📋");
-    });
-    document.getElementById('btn-copy-description').addEventListener('click', () => {
-      copyText(document.getElementById('html-raw-code').value, "HTML Description copied! 📋");
-    });
-    document.getElementById('btn-toggle-html').addEventListener('click', () => {
-      const raw = document.getElementById('html-raw-code');
-      const rendered = document.getElementById('html-rendered-preview');
-      raw.classList.toggle('hidden');
-      rendered.classList.toggle('hidden');
-    });
-    function renderQueue() {
-      const tbody = document.getElementById('queue-table-body');
-      const emptyMsg = document.getElementById('queue-empty-msg');
-      document.getElementById('queue-count').textContent = state.queue.length;
-      document.getElementById('queue-stat-scanned').textContent = `${state.queue.length} items`;
-      const boughtItems = state.queue.filter(i => i.bought);
-      document.getElementById('queue-stat-bought').textContent = `${boughtItems.length} items`;
-      const totalProfit = boughtItems.reduce((acc, i) => acc + (parseFloat(i.profit) || 0), 0);
-      document.getElementById('queue-stat-profit').textContent = `$${totalProfit.toFixed(2)}`;
-      if (state.queue.length === 0) {
-        tbody.innerHTML = '';
-        emptyMsg.classList.remove('hidden');
-        return;
-      }
-      emptyMsg.classList.add('hidden');
-      tbody.innerHTML = state.queue.map((item, idx) => `
-        <tr class="hover:bg-[#f4f8f3] font-mono ${item.bought ? 'bg-[#eaf3e8]/60' : ''}">
-          <td class="py-2.5 px-3 font-sans font-semibold text-[#2c2016]">${item.name}</td>
-          <td class="py-2.5 px-3 text-[#587654]">${item.maker}</td>
-          <td class="py-2.5 px-3 font-bold">$${(parseFloat(item.comp)||0).toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-amber-900">$${(parseFloat(item.buy)||0).toFixed(2)}</td>
-          <td class="py-2.5 px-3 font-bold text-emerald-800">+$${(parseFloat(item.profit)||0).toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-amber-800 font-bold">$${(parseFloat(item.target3x)||0).toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-right">
-            <button onclick="deleteQueueItem(${idx})" class="text-rose-700 hover:text-rose-900 font-sans font-bold text-[11px] underline">Remove</button>
-          </td>
-        </tr>
-      `).join('');
-    }
-    window.deleteQueueItem = function(idx) {
-      state.queue.splice(idx, 1);
-      localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-      renderQueue();
-      showToast("Item removed from history");
-    };
-    document.getElementById('btn-clear-queue').addEventListener('click', () => {
-      state.queue = [];
-      localStorage.removeItem('yami_queue');
-      renderQueue();
-      showToast("Sourcing history cleared");
-    });
-    document.getElementById('btn-see-details').addEventListener('click', () => switchTab('studio'));
-    document.getElementById('btn-snap-next').addEventListener('click', () => {
-      state.photos = [];
-      renderPhotoTray();
-      document.getElementById('scout-notes-input').value = '';
-      document.getElementById('quick-result-card').classList.add('hidden');
-      document.getElementById('camera-snap-input').click();
-    });
     function getCurrentItemPayload() {
-      const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
-      const buy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
-      const shipCharged = parseFloat(document.getElementById('input-ship-charged').value) || 0;
+      const getNum = (id) => parseFloat(document.getElementById(id)?.value) || 0;
+      const comp = getNum('input-comp-price');
+      const buy = getNum('input-buy-cost');
+      const shipCharged = getNum('input-ship-charged');
       const gross = comp + shipCharged;
-      const ebayFee = (gross * (state.settings.feeRate / 100)) + 0.40;
-      const tier = document.getElementById('input-ship-tier').value;
+      const ebayFee = (gross * ((state.settings.feeRate || 13.25) / 100)) + 0.40;
+      const tier = document.getElementById('input-ship-tier')?.value || 'standard';
       const shipOut = tier === 'fragile' ? (state.settings.fragShip + state.settings.fragPack) : (state.settings.stdShip + state.settings.stdPack);
       const netPayout = gross - ebayFee - shipOut;
       const profit = netPayout - buy;
       const roi = buy > 0 ? ((profit / buy) * 100).toFixed(0) + '%' : 'N/A';
-      const name = document.getElementById('input-item-name').value || 'Vintage Item';
-      const query = encodeURIComponent(state.current.primaryQuery || name);
+      const name = document.getElementById('input-item-name')?.value || 'Vintage Item';
       return {
         dateAdded: new Date().toLocaleDateString(),
+        itemName: name,
         name: name,
-        maker: document.getElementById('input-maker').value || 'Unknown',
-        confidence: document.getElementById('input-confidence').value || 'Verified',
-        comp: comp.toFixed(2),
-        buy: buy.toFixed(2),
+        maker: document.getElementById('input-maker')?.value || 'Unknown',
+        confidence: document.getElementById('input-confidence')?.value || 'Verified',
+        compPrice: comp,
+        buyCost: buy,
         gross: gross.toFixed(2),
         ebayFee: ebayFee.toFixed(2),
         netPayout: netPayout.toFixed(2),
-        profit: profit.toFixed(2),
+        profit: profit,
         roi: roi,
         target3x: (comp / 3.0).toFixed(2),
         target2x: (comp / 2.0).toFixed(2),
-        verdict: buy > 0 ? (buy <= comp/3 ? 'STRONG BUY' : (buy <= comp/2 ? 'MODERATE BUY' : 'MARGIN SLIM')) : 'SCANNED',
-        seoTitle: document.getElementById('studio-title-input').value || name,
-        category: document.getElementById('spec-category').value || '',
-        era: document.getElementById('spec-era').value || '',
-        material: document.getElementById('spec-material').value || '',
-        dimensions: document.getElementById('spec-dimensions').value || '',
-        condition: document.getElementById('studio-condition-desc').value || '',
-        terapeakUrl: `https://www.ebay.com/sh/research?keywords=${query}`,
-        soldUrl: `https://www.ebay.com/sch/i.html?_nkw=${query}&LH_Sold=1&LH_Complete=1`,
+        seoTitle: document.getElementById('studio-title-input')?.value || name,
+        category: document.getElementById('spec-category')?.value || '',
+        era: document.getElementById('spec-era')?.value || '',
+        material: document.getElementById('spec-material')?.value || '',
+        dimensions: document.getElementById('spec-dimensions')?.value || '',
+        conditionDesc: document.getElementById('studio-condition-desc')?.value || '',
         bought: true
       };
     }
+
     async function sendToGoogleDrive(items, successMsg) {
       if (!state.settings.gdriveWebhook) {
         showToast("Set Google Drive Webhook in Settings ⚙️", "⚠️");
@@ -679,90 +620,178 @@ Return your final output as a pure JSON object conforming to this schema:
         showToast("Drive Sync sent!", "✅");
       }
     }
-    document.getElementById('btn-quick-bought').addEventListener('click', async () => {
-      const payload = getCurrentItemPayload();
-      state.queue.unshift(payload);
-      localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-      renderQueue();
-      await sendToGoogleDrive(payload, "Marked Bought & Synced to Google Drive! 🚀");
-    });
-    document.getElementById('btn-sync-gdrive').addEventListener('click', async () => {
-      const payload = getCurrentItemPayload();
-      await sendToGoogleDrive(payload, "Synced to Google Drive Master Sheet! 📁");
-    });
-    document.getElementById('btn-save-to-queue').addEventListener('click', async () => {
-      const payload = getCurrentItemPayload();
-      state.queue.unshift(payload);
-      localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-      renderQueue();
-      if (state.settings.gdriveAutosync) {
-        await sendToGoogleDrive(payload, "Saved to Queue & Auto-Synced to Drive! 📦");
-      } else {
-        showToast("Saved to Sourcing Queue! 📦");
-      }
-    });
-    // Settings Page Listeners
-    document.getElementById('btn-save-key').addEventListener('click', () => {
-      const key = document.getElementById('set-gemini-key').value.trim();
-      state.settings.geminiKey = key;
-      localStorage.setItem('yamis_gemini_api_key', key);
-      localStorage.setItem('yami_settings', JSON.stringify(state.settings));
-      showToast("Gemini API Key saved locally! 🔑");
-    });
-    document.getElementById('btn-toggle-key-view').addEventListener('click', () => {
-      const input = document.getElementById('set-gemini-key');
-      const btn = document.getElementById('btn-toggle-key-view');
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = 'Hide';
-      } else {
-        input.type = 'password';
-        btn.textContent = 'Show';
-      }
-    });
-    document.getElementById('btn-save-settings').addEventListener('click', () => {
-      state.settings.geminiKey = document.getElementById('set-gemini-key').value.trim();
-      state.settings.gdriveWebhook = document.getElementById('set-gdrive-webhook').value.trim();
-      state.settings.gdriveAutosync = document.getElementById('set-gdrive-autosync').checked;
-      state.settings.feeRate = parseFloat(document.getElementById('set-fee-rate').value) || 13.25;
-      state.settings.stdShip = parseFloat(document.getElementById('set-std-ship').value) || 8.00;
-      localStorage.setItem('yamis_gemini_api_key', state.settings.geminiKey);
-      localStorage.setItem('yami_settings', JSON.stringify(state.settings));
-      calculateFinancials();
-      showToast("All settings saved! ⚙️");
-    });
-    document.getElementById('btn-reset-settings').addEventListener('click', () => {
-      localStorage.removeItem('yami_settings');
-      state.settings.feeRate = 13.25;
-      state.settings.stdShip = 8.00;
-      document.getElementById('set-fee-rate').value = "13.25";
-      document.getElementById('set-std-ship').value = "8.00";
-      calculateFinancials();
-      showToast("Settings reset to defaults");
-    });
-    document.getElementById('btn-export-csv').addEventListener('click', () => {
-      if (state.queue.length === 0) {
-        showToast("Queue is empty, nothing to export ⚠️");
+
+    async function evaluateFindWrapper() {
+      const notesInp = document.getElementById('scout-notes-input');
+      const notes = notesInp ? notesInp.value.trim() : '';
+      const statusBox = document.getElementById('eval-status-box');
+      const evalBtn = document.getElementById('btn-evaluate');
+      const rawKey = state.settings.geminiKey || localStorage.getItem('yamis_gemini_api_key') || '';
+      if (state.photos.length === 0 && !notes) {
+        showToast("Snap a photo or add notes first!", "⚠️");
         return;
       }
-      const headers = ["Date", "Item Name", "Maker", "Confidence", "Comp Price", "Buy Cost", "Net Profit", "3x Target", "Bought"];
-      const rows = state.queue.map(i => [
-        `"${i.dateAdded||''}"`, `"${(i.name||'').replace(/"/g, '""')}"`, `"${(i.maker||'').replace(/"/g, '""')}"`, `"${i.confidence||''}"`,
-        i.comp||0, i.buy||0, i.profit||0, i.target3x||0, i.bought ? "Yes" : "No"
-      ]);
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `yamis_inventory_${new Date().toISOString().slice(0,10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast("CSV Export downloaded! 📥");
-    });
+      if (state.photos.length > 0 && !rawKey) {
+        showToast("Gemini API Key Required! Set in Settings ⚙️", "⚠️");
+        switchTab('settings');
+        return;
+      }
+      if (statusBox) statusBox.classList.remove('hidden');
+      if (evalBtn) evalBtn.disabled = true;
+      try {
+        await runGeminiVisionAnalysis(rawKey, notes);
+      } catch (err) {
+        showToast(`Evaluation Error: ${err.message}`, "⚠️");
+      } finally {
+        if (statusBox) statusBox.classList.add('hidden');
+        if (evalBtn) evalBtn.disabled = false;
+      }
+    }
 
-    // Init on DOM Load
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', () => {
+      const addListener = (id, event, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(event, fn); };
+      addListener('btn-camera-snap', 'click', () => document.getElementById('camera-snap-input')?.click());
+      addListener('btn-photo-upload', 'click', () => document.getElementById('photo-upload-input')?.click());
+      addListener('camera-snap-input', 'change', (e) => { handleFiles(e.target.files); e.target.value = ''; });
+      addListener('photo-upload-input', 'change', (e) => { handleFiles(e.target.files); e.target.value = ''; });
+      addListener('btn-clear-photos', 'click', () => { state.photos = []; renderPhotoTray(); showToast("Photos cleared"); });
+      addListener('btn-clear-intake', 'click', () => {
+        state.photos = [];
+        renderPhotoTray();
+        const notesInp = document.getElementById('scout-notes-input');
+        if (notesInp) notesInp.value = '';
+        const card = document.getElementById('quick-result-card');
+        if (card) card.classList.add('hidden');
+        showToast("Intake reset");
+      });
+      addListener('tab-scout-btn', 'click', () => switchTab('scout'));
+      addListener('tab-studio-btn', 'click', () => switchTab('studio'));
+      addListener('tab-queue-btn', 'click', () => switchTab('queue'));
+      addListener('tab-settings-btn', 'click', () => switchTab('settings'));
+      addListener('btn-back-to-scout', 'click', () => switchTab('scout'));
+      addListener('btn-evaluate', 'click', evaluateFindWrapper);
+      addListener('btn-see-details', 'click', () => switchTab('studio'));
+      addListener('btn-snap-next', 'click', () => {
+        state.photos = [];
+        renderPhotoTray();
+        const notesInp = document.getElementById('scout-notes-input');
+        if (notesInp) notesInp.value = '';
+        const card = document.getElementById('quick-result-card');
+        if (card) card.classList.add('hidden');
+        document.getElementById('camera-snap-input')?.click();
+      });
+      addListener('btn-quick-bought', 'click', async () => {
+        const payload = getCurrentItemPayload();
+        state.queue.unshift(payload);
+        localStorage.setItem('yami_queue', JSON.stringify(state.queue));
+        renderQueue();
+        await sendToGoogleDrive(payload, "Marked Bought & Synced to Google Drive! 🚀");
+      });
+      addListener('btn-sync-gdrive', 'click', async () => {
+        const payload = getCurrentItemPayload();
+        await sendToGoogleDrive(payload, "Synced to Google Drive Master Sheet! 📁");
+      });
+      addListener('btn-save-to-queue', 'click', async () => {
+        const payload = getCurrentItemPayload();
+        state.queue.unshift(payload);
+        localStorage.setItem('yami_queue', JSON.stringify(state.queue));
+        renderQueue();
+        if (state.settings.gdriveAutosync) {
+          await sendToGoogleDrive(payload, "Saved to Queue & Auto-Synced to Drive! 📦");
+        } else {
+          showToast("Saved to Sourcing Queue! 📦");
+        }
+      });
+      addListener('btn-save-key', 'click', () => {
+        const k = document.getElementById('set-gemini-key')?.value.trim() || '';
+        state.settings.geminiKey = k;
+        localStorage.setItem('yamis_gemini_api_key', k);
+        localStorage.setItem('yami_settings', JSON.stringify(state.settings));
+        showToast("Gemini Key Saved!", "⚙️");
+      });
+      addListener('btn-toggle-key-view', 'click', () => {
+        const input = document.getElementById('set-gemini-key');
+        const btn = document.getElementById('btn-toggle-key-view');
+        if (input && btn) {
+          if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'Hide';
+          } else {
+            input.type = 'password';
+            btn.textContent = 'Show';
+          }
+        }
+      });
+      addListener('btn-save-settings', 'click', () => {
+        state.settings.geminiKey = document.getElementById('set-gemini-key')?.value.trim() || '';
+        state.settings.gdriveWebhook = document.getElementById('set-gdrive-webhook')?.value.trim() || '';
+        state.settings.gdriveAutosync = document.getElementById('set-gdrive-autosync')?.checked || false;
+        state.settings.feeRate = parseFloat(document.getElementById('set-fee-rate')?.value) || 13.25;
+        state.settings.stdShip = parseFloat(document.getElementById('set-std-ship')?.value) || 8.00;
+        localStorage.setItem('yamis_gemini_api_key', state.settings.geminiKey);
+        localStorage.setItem('yami_settings', JSON.stringify(state.settings));
+        calculateFinancials();
+        showToast("All settings saved! ⚙️");
+      });
+      addListener('btn-reset-settings', 'click', () => {
+        localStorage.removeItem('yami_settings');
+        state.settings.feeRate = 13.25;
+        state.settings.stdShip = 8.00;
+        const feeEl = document.getElementById('set-fee-rate');
+        const shipEl = document.getElementById('set-std-ship');
+        if (feeEl) feeEl.value = "13.25";
+        if (shipEl) shipEl.value = "8.00";
+        calculateFinancials();
+        showToast("Settings reset to defaults");
+      });
+      addListener('btn-export-csv', 'click', () => {
+        if (state.queue.length === 0) {
+          showToast("Queue is empty, nothing to export ⚠️");
+          return;
+        }
+        const headers = ["Date", "Item Name", "Maker", "Confidence", "Comp Price", "Buy Cost", "Net Profit", "3x Target", "Bought"];
+        const rows = state.queue.map(i => [
+          `"${i.dateAdded||''}"`, `"${(i.itemName||i.name||'').replace(/"/g, '""')}"`, `"${(i.maker||'').replace(/"/g, '""')}"`, `"${i.confidence||''}"`,
+          i.compPrice||i.comp||0, i.buyCost||i.buy||0, i.profit||0, i.target3x||0, i.bought ? "Yes" : "No"
+        ]);
+        const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `yamis_inventory_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("CSV Export downloaded! 📥");
+      });
+      addListener('btn-clear-queue', 'click', () => {
+        state.queue = [];
+        localStorage.removeItem('yami_queue');
+        renderQueue();
+        showToast("Sourcing history cleared");
+      });
+      addListener('btn-copy-title', 'click', () => {
+        const val = document.getElementById('studio-title-input')?.value;
+        if (val) { navigator.clipboard?.writeText(val); showToast("eBay Title copied! 📋"); }
+      });
+      addListener('btn-copy-description', 'click', () => {
+        const val = document.getElementById('html-raw-code')?.value;
+        if (val) { navigator.clipboard?.writeText(val); showToast("HTML Description copied! 📋"); }
+      });
+      addListener('btn-toggle-html', 'click', () => {
+        const raw = document.getElementById('html-raw-code');
+        const rendered = document.getElementById('html-rendered-preview');
+        if (raw && rendered) {
+          raw.classList.toggle('hidden');
+          rendered.classList.toggle('hidden');
+        }
+      });
+      ['input-item-name', 'input-maker', 'input-comp-price', 'input-buy-cost', 'input-ship-charged', 'input-ship-tier', 'studio-condition-desc', 'spec-era', 'spec-material'].forEach(id => {
+        addListener(id, 'input', () => {
+          calculateFinancials();
+          updateSEOTitleAndHTML();
+        });
+      });
       if (state.settings.geminiKey) {
         const keyInput = document.getElementById('set-gemini-key');
         if (keyInput) keyInput.value = state.settings.geminiKey;
@@ -771,629 +800,15 @@ Return your final output as a pure JSON object conforming to this schema:
         const hookInput = document.getElementById('set-gdrive-webhook');
         if (hookInput) hookInput.value = state.settings.gdriveWebhook;
       }
-      document.getElementById('set-gdrive-autosync').checked = !!state.settings.gdriveAutosync;
-      document.getElementById('set-fee-rate').value = state.settings.feeRate || 13.25;
-      document.getElementById('set-std-ship').value = state.settings.stdShip || 8.00;
-      calculateFinancials();
-      renderQueue();
-    });
-  </script>
-</body>
-</html>
-
-      if (notes && notes.length > 3) {
-        name = notes.replace(/\$?\d+(?:\.\d{2})?/g, '').trim() || name;
-      }
-
-      const mockData = {
-        itemName: name,
-        maker: maker,
-        confidence: "Working Theory",
-        diagNotes: notePrefix ? `${notePrefix} Visual inspection indicates vintage production.` : "Visual inspection indicates mid-century handcrafted production with finished base.",
-        primaryQuery: name,
-        compPrice: comp,
-        buyCost: buy,
-        shipCharged: 8.00,
-        shipTier: "standard",
-        category: "Pottery & Glass > Decorative Cookware, Dinnerware & Serveware > Bowls",
-        era: "Mid-to-Late 20th Century",
-        material: "Ceramic / Art Glass",
-        pattern: "Artisan Handcrafted",
-        dimensions: "Approx. 6 in x 4 in",
-        visualDesc: `Distinctive vintage piece featuring artisan craftsmanship and clean form.`,
-        conditionDesc: "Very good vintage condition with no chips or cracks. Light surface wear on base consistent with age."
-      };
-
-      populateItemData(mockData);
-      displayQuickResult(mockData);
-      showToast("Quick comp evaluated! Add Gemini Key in Settings for live AI. ℹ️");
-    }
-
-    // Populate Studio & Calculations
-    function populateItemData(data) {
-      state.current = { ...state.current, ...data };
-
-      document.getElementById('input-item-name').value = data.itemName || '';
-      document.getElementById('input-maker').value = data.maker || '';
-      document.getElementById('input-comp-price').value = (data.compPrice || 0).toFixed(2);
-      document.getElementById('input-buy-cost').value = (data.buyCost || 0).toFixed(2);
-      document.getElementById('input-ship-charged').value = (data.shipCharged || 8.00).toFixed(2);
-      document.getElementById('input-ship-tier').value = data.shipTier || 'standard';
-
-      if (data.confidence) {
-        const confSelect = document.getElementById('input-confidence');
-        for (let i = 0; i < confSelect.options.length; i++) {
-          if (confSelect.options[i].value.toLowerCase().includes(data.confidence.toLowerCase())) {
-            confSelect.selectedIndex = i;
-            break;
-          }
-        }
-      }
-
-      document.getElementById('spec-brand').value = data.maker || '';
-      document.getElementById('spec-type').value = data.pattern || 'Collectible';
-      document.getElementById('spec-era').value = data.era || 'Mid-20th Century';
-      document.getElementById('spec-material').value = data.material || '';
-      document.getElementById('spec-dimensions').value = data.dimensions || '';
-      document.getElementById('spec-category').value = data.category || '';
-      document.getElementById('studio-diag-notes').value = data.diagNotes || '';
-      document.getElementById('studio-condition-desc').value = data.conditionDesc || '';
-
-      calculateFinancials();
-      updateStudio();
-      updateSearchLinks();
-    }
-
-    // Display The Quick & Easy Answer Result Card
-    function displayQuickResult(data) {
-      const card = document.getElementById('quick-result-card');
-      const verdictPill = document.getElementById('result-verdict-pill');
-      const ruleText = document.getElementById('result-rule-text');
-      const itemNameHead = document.getElementById('result-item-name');
-      const makerVal = document.getElementById('result-maker-val');
-      const eraVal = document.getElementById('result-era-val');
-      const compHead = document.getElementById('result-comp-price-head');
-      const compVal = document.getElementById('result-comp-val');
-      const target3xVal = document.getElementById('result-target3x-val');
-      const profitVal = document.getElementById('result-profit-val');
-      const confPill = document.getElementById('result-confidence-pill');
-
-      const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
-      const buy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
-      const target3x = comp > 0 ? (comp / 3.0) : 0;
-      const target2x = comp > 0 ? (comp / 2.0) : 0;
-      const estProfit = parseFloat(document.getElementById('calc-est-profit').textContent.replace(/[^0-9.-]/g, '')) || 0;
-
-      itemNameHead.textContent = data.itemName || 'Vintage Sourced Item';
-      makerVal.textContent = data.maker || 'Unmarked / Unknown';
-      eraVal.textContent = data.era || 'Vintage Era';
-      compHead.textContent = `$${comp.toFixed(2)}`;
-      compVal.textContent = `$${comp.toFixed(2)}`;
-      target3xVal.textContent = `$${target3x.toFixed(2)}`;
-      profitVal.textContent = `${estProfit >= 0 ? '+' : ''}$${estProfit.toFixed(2)}`;
-      confPill.textContent = data.confidence || 'Attributed';
-
-      // Rule & Verdict Logic
-      if (buy > 0) {
-        if (buy <= target3x) {
-          verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#e8f2e5] text-[#244220] border-2 border-[#587654] shadow-sm";
-          verdictPill.textContent = "🟢 GREAT BUY (3x+ Return)";
-          ruleText.innerHTML = `Buy confirmed! At <span class="text-[#244220] font-black">$${buy.toFixed(2)}</span>, you beat your 3x target limit of <span class="text-[#b8860b] font-black">$${target3x.toFixed(2)}</span>. Projected net profit: <span class="text-[#244220] font-black">+$${estProfit.toFixed(2)}</span>.`;
-        } else if (buy <= target2x) {
-          verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#fef9ec] text-[#6d510e] border-2 border-[#c59b27] shadow-sm";
-          verdictPill.textContent = "🟡 GOOD BUY (2x Return)";
-          ruleText.innerHTML = `Good buy at <span class="text-[#2c2016] font-black">$${buy.toFixed(2)}</span> (within 2x estate target of $${target2x.toFixed(2)}). Comps average <span class="text-[#2c2016] font-black">$${comp.toFixed(2)}</span> with estimated profit of <span class="text-[#244220] font-black">+$${estProfit.toFixed(2)}</span>.`;
-        } else if (estProfit > 0) {
-          verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#fef9ec] text-[#6d510e] border-2 border-[#c59b27] shadow-sm";
-          verdictPill.textContent = "🟡 CONDITIONAL BUY";
-          ruleText.innerHTML = `Asking <span class="text-rose-900 font-bold">$${buy.toFixed(2)}</span> leaves thin profit (<span class="text-[#244220]">+$${estProfit.toFixed(2)}</span>). Try negotiating under <span class="text-[#b8860b] font-black">$${target3x.toFixed(2)}</span>.`;
-        } else {
-          verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#fdeeed] text-[#7a201c] border-2 border-[#d97774] shadow-sm";
-          verdictPill.textContent = "🔴 PASS / BAD BUY";
-          ruleText.innerHTML = `Pass! Asking <span class="text-rose-900 font-black">$${buy.toFixed(2)}</span> exceeds comps (<span class="text-[#2c2016]">$${comp.toFixed(2)}</span>). You would lose money after eBay fees and shipping.`;
-        }
-      } else {
-        verdictPill.className = "px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wider bg-[#e8f2e5] text-[#244220] border-2 border-[#587654] shadow-sm";
-        verdictPill.textContent = "🟢 GOOD BUY IF UNDER TARGET";
-        ruleText.innerHTML = `Buy if under <span class="text-[#244220] font-black">$${target3x.toFixed(2)}</span> for a 3x return. Recent eBay sold comps average <span class="text-[#2c2016] font-black">$${comp.toFixed(2)}</span>.`;
-      }
-
-      // Update Search Links on Quick Card
-      const q = encodeURIComponent(data.primaryQuery || data.itemName || '');
-      const imgBtn = document.getElementById('btn-quick-images');
-      if (imgBtn) imgBtn.href = `https://www.google.com/search?tbm=isch&q=${q}`;
-      document.getElementById('btn-quick-terapeak').href = `https://www.ebay.com/sh/research?marketplace=EBAY-US&keywords=${q}&dayRange=365&endDate=${Date.now()}&startDate=${Date.now() - 31536000000}`;
-      document.getElementById('btn-quick-sold').href = `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`;
-
-      // Reset Bought Button State
-      const boughtLabel = document.getElementById('bought-btn-label');
-      const boughtBtn = document.getElementById('btn-quick-bought');
-      if (buy > 0) {
-        boughtLabel.textContent = `Bought ($${buy.toFixed(2)}) • Synced ☁️`;
-        boughtBtn.className = "flex-1 sm:flex-none px-6 py-3.5 bg-emerald-900 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg border-2 border-emerald-400 active:scale-95 transition flex items-center justify-center gap-2";
-      } else {
-        boughtLabel.textContent = "Mark as Bought";
-        boughtBtn.className = "flex-1 sm:flex-none px-6 py-3.5 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2";
-      }
-
-      // AUTOMATIC QUEUE LOGGING: Automatically log this scan to Session History
-      const scanItem = {
-        id: Date.now(),
-        name: data.itemName || 'Vintage Sourced Item',
-        maker: data.maker || '—',
-        comp: comp,
-        buy: buy,
-        shipTier: document.getElementById('input-ship-tier').value,
-        profit: estProfit,
-        target3x: target3x,
-        verdict: verdictPill.textContent.trim(),
-        bought: buy > 0,
-        dateAdded: new Date().toISOString().slice(0, 10),
-        data: { ...state.current }
-      };
-
-      // Prevent duplicate scan within 2 minutes of same item
-      const duplicateIdx = state.queue.findIndex(i => i.name === scanItem.name && (Date.now() - i.id < 120000));
-      if (duplicateIdx !== -1) {
-        state.queue[duplicateIdx] = scanItem;
-      } else {
-        state.queue.unshift(scanItem);
-      }
-
-      try {
-        localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-      } catch (e) {}
-
-      renderQueue();
-
-      // If already has purchase price, auto-sync to Google Drive immediately
-      if (buy > 0 && state.settings.gdriveWebhook) {
-        sendToGoogleDrive([getCurrentItemPayload()], `"${scanItem.name}" auto-synced to Google Drive! ☁️`);
-      }
-
-      card.classList.remove('hidden');
-      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-// Actions on Quick Result Card
-    document.getElementById('btn-see-details').addEventListener('click', () => {
-      switchTab('studio');
-    });
-
-    document.getElementById('btn-snap-next').addEventListener('click', () => {
-      state.photos = [];
-      renderPhotoTray();
-      document.getElementById('scout-notes-input').value = '';
-      document.getElementById('quick-result-card').classList.add('hidden');
-      showToast("Ready for next item! 📸");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // MARK AS BOUGHT BUTTON & AUTO-SYNC TO GOOGLE DRIVE
-    document.getElementById('btn-quick-bought').addEventListener('click', () => {
-      let currentBuy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
-      const target3x = parseFloat(document.getElementById('limit-3x-display').textContent.replace(/[^0-9.-]/g, '')) || 0;
-      
-      const defaultPrice = currentBuy > 0 ? currentBuy.toFixed(2) : (target3x > 0 ? target3x.toFixed(2) : "10.00");
-      const userPriceInput = prompt("Enter purchase price paid for this item ($):", defaultPrice);
-      if (userPriceInput === null) return;
-
-      const enteredPrice = parseFloat(userPriceInput) || 0;
-      document.getElementById('input-buy-cost').value = enteredPrice.toFixed(2);
-      calculateFinancials();
-      updateStudio();
-
-      // Update current item in queue
-      if (state.queue.length > 0) {
-        state.queue[0].buy = enteredPrice;
-        state.queue[0].bought = true;
-        state.queue[0].profit = parseFloat(document.getElementById('calc-est-profit').textContent.replace(/[^0-9.-]/g, '')) || 0;
-        try {
-          localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-        } catch (e) {}
-        renderQueue();
-      }
-
-      // Update Button UI
-      document.getElementById('bought-btn-label').textContent = `Purchased ($${enteredPrice.toFixed(2)}) • Synced ☁️`;
-      const boughtBtn = document.getElementById('btn-quick-bought');
-      boughtBtn.className = "flex-1 sm:flex-none px-6 py-3.5 bg-emerald-900 text-[#f5f8f4] font-black text-sm sm:text-base rounded-xl shadow-lg border-2 border-emerald-400 active:scale-95 transition flex items-center justify-center gap-2";
-
-      // AUTO-SYNC TO GOOGLE DRIVE IN BACKGROUND
-      const payload = getCurrentItemPayload();
-      sendToGoogleDrive([payload], `"${payload.name}" saved as Bought & auto-synced to Drive! ☁️`);
-      showToast(`Bought for $${enteredPrice.toFixed(2)} & auto-synced to Google Drive! ☁️`, "✅");
-    });
-// ==========================================
-    // FINANCIAL CALCULATIONS & STUDIO UPDATES
-    // ==========================================
-    function calculateFinancials() {
-      const comp = parseFloat(document.getElementById('input-comp-price').value) || 0;
-      const buy = parseFloat(document.getElementById('input-buy-cost').value) || 0;
-      const shipCharged = parseFloat(document.getElementById('input-ship-charged').value) || 0;
-      const tier = document.getElementById('input-ship-tier').value;
-
-      const feeRate = (state.settings.feeRate || 13.25) / 100;
-      const shipCost = (tier === 'fragile') ? state.settings.fragShip : state.settings.stdShip;
-      const packCost = (tier === 'fragile') ? state.settings.fragPack : state.settings.stdPack;
-      const totalShippingExpense = shipCost + packCost;
-
-      const gross = comp + shipCharged;
-      const ebayFee = (gross * feeRate) + 0.40;
-      const netPayout = gross - ebayFee - totalShippingExpense;
-      const netProfit = netPayout - buy;
-
-      document.getElementById('calc-gross').textContent = `$${gross.toFixed(2)}`;
-      document.getElementById('calc-ebay-fee').textContent = `-$${ebayFee.toFixed(2)}`;
-      document.getElementById('calc-ship-out').textContent = `-$${totalShippingExpense.toFixed(2)}`;
-      document.getElementById('calc-net-payout').textContent = `$${Math.max(0, netPayout).toFixed(2)}`;
-      
-      const profitDisplay = document.getElementById('calc-est-profit');
-      profitDisplay.textContent = `${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
-      profitDisplay.className = netProfit >= 0 ? "text-base text-[#244220] font-black" : "text-base text-rose-800 font-black";
-
-      // 3x and 2x target limits
-      const target3x = comp > 0 ? (comp / 3.0) : 0;
-      const target2x = comp > 0 ? (comp / 2.0) : 0;
-      document.getElementById('limit-3x-display').textContent = `$${target3x.toFixed(2)}`;
-      document.getElementById('limit-2x-display').textContent = `$${target2x.toFixed(2)}`;
-    }
-
-    function updateSearchLinks() {
-      const query = (document.getElementById('input-item-name').value || '').trim();
-      if (!query) return;
-      const q = encodeURIComponent(query);
-      const imgBtn = document.getElementById('btn-quick-images');
-      if (imgBtn) imgBtn.href = `https://www.google.com/search?tbm=isch&q=${q}`;
-      document.getElementById('btn-quick-terapeak').href = `https://www.ebay.com/sh/research?marketplace=EBAY-US&keywords=${q}&dayRange=365&endDate=${Date.now()}&startDate=${Date.now() - 31536000000}`;
-      document.getElementById('btn-quick-sold').href = `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`;
-    }
-
-    function updateStudio() {
-      const name = document.getElementById('input-item-name').value || '';
-      const brand = document.getElementById('spec-brand').value || '';
-      const era = document.getElementById('spec-era').value || '';
-      const material = document.getElementById('spec-material').value || '';
-      const dimensions = document.getElementById('spec-dimensions').value || '';
-
-      // Auto SEO Title
-      let seoTitle = document.getElementById('studio-title-input').value;
-      if (!seoTitle || seoTitle.length < 5) {
-        seoTitle = `Vintage ${brand} ${name} ${material} ${dimensions}`.replace(/\s+/g, ' ').trim();
-        if (seoTitle.length > 80) seoTitle = seoTitle.substring(0, 80);
-        document.getElementById('studio-title-input').value = seoTitle;
-      }
-      updateTitleCharCount();
-      renderHtmlDescription();
-    }
-
-    function updateTitleCharCount() {
-      const inp = document.getElementById('studio-title-input');
-      const counter = document.getElementById('title-char-count');
-      const len = (inp.value || '').length;
-      counter.textContent = `${len} / 80`;
-      if (len > 75) counter.className = "font-mono font-bold text-amber-800";
-      else if (len >= 60) counter.className = "font-mono font-bold text-[#2e5229]";
-      else counter.className = "font-mono font-bold text-[#587654]";
-    }
-
-    document.getElementById('studio-title-input').addEventListener('input', updateTitleCharCount);
-
-    function renderHtmlDescription() {
-      const title = document.getElementById('studio-title-input').value || document.getElementById('input-item-name').value || 'Vintage Item';
-      const brand = document.getElementById('spec-brand').value || '';
-      const era = document.getElementById('spec-era').value || '';
-      const mat = document.getElementById('spec-material').value || '';
-      const dim = document.getElementById('spec-dimensions').value || '';
-      const cond = document.getElementById('studio-condition-desc').value || 'Excellent vintage condition with no chips or cracks.';
-      const notes = document.getElementById('studio-diag-notes').value || '';
-
-      const html = `<div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; color: #23160e; line-height: 1.6;">
-  <div style="background-color: #141a15; color: #f5f8f4; padding: 18px 24px; border-radius: 8px 8px 0 0; border-bottom: 2px solid #587654;">
-    <h2 style="margin: 0; font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: #e2be58; text-transform: uppercase;">Yami's Attic Treasures</h2>
-    <p style="margin: 4px 0 0; font-size: 12px; color: #b5ccb1;">Antiques • Collectibles • Vintage Finds • Port St. Lucie, FL</p>
-  </div>
-  <div style="padding: 24px; background-color: #fdfbf7; border: 1px solid #b5ccb1; border-top: none; border-radius: 0 0 8px 8px;">
-    <h1 style="font-size: 18px; color: #23160e; font-family: Georgia, serif; margin-top: 0;">${title}</h1>
-    <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px;">
-      <tr style="background-color: #f4f8f3;"><td style="padding: 8px; font-weight: bold; width: 30%;">Brand / Maker</td><td style="padding: 8px;">${brand || 'Unmarked / Studio'}</td></tr>
-      <tr><td style="padding: 8px; font-weight: bold;">Era</td><td style="padding: 8px;">${era || 'Vintage'}</td></tr>
-      <tr style="background-color: #f4f8f3;"><td style="padding: 8px; font-weight: bold;">Material</td><td style="padding: 8px;">${mat || 'Glass / Ceramic'}</td></tr>
-      <tr><td style="padding: 8px; font-weight: bold;">Dimensions</td><td style="padding: 8px;">${dim || 'See photos'}</td></tr>
-    </table>
-    <h3 style="font-size: 15px; color: #382417; font-family: Georgia, serif;">Condition Disclosure</h3>
-    <div style="background-color: #f4f8f3; padding: 12px; border-left: 4px solid #587654; font-size: 13px;">${cond}</div>
-    ${notes ? `<p style="font-size: 12px; color: #587654; margin-top: 12px;"><strong>Forensic Notes:</strong> ${notes}</p>` : ''}
-    <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #b5ccb1; font-size: 11px; color: #587654;">
-      <p style="margin: 0;"><strong>Shipping:</strong> Packed securely with professional bubble wrap and double-wall boxes to guarantee safe arrival.</p>
-    </div>
-  </div>
-</div>`;
-
-      document.getElementById('html-rendered-preview').innerHTML = html;
-      document.getElementById('html-raw-code').value = html;
-    }
-
-    // Input change listeners
-    ['input-comp-price', 'input-buy-cost', 'input-ship-charged', 'input-ship-tier'].forEach(id => {
-      document.getElementById(id).addEventListener('input', () => {
-        calculateFinancials();
-        if (!document.getElementById('quick-result-card').classList.contains('hidden')) {
-          displayQuickResult(state.current);
-        }
-      });
-    });
-
-    ['input-item-name', 'spec-brand', 'spec-era', 'spec-material', 'spec-dimensions', 'studio-condition-desc', 'studio-diag-notes'].forEach(id => {
-      document.getElementById(id).addEventListener('input', () => {
-        updateStudio();
-        updateSearchLinks();
-      });
-    });
-
-    // Copy Handlers
-    document.getElementById('btn-copy-title').addEventListener('click', () => {
-      const t = document.getElementById('studio-title-input').value;
-      if (t) copyText(t, "eBay title copied!");
-    });
-
-    document.getElementById('btn-copy-description').addEventListener('click', () => {
-      const code = document.getElementById('html-raw-code').value;
-      if (code) copyText(code, "HTML description copied!");
-    });
-
-    document.getElementById('btn-toggle-html').addEventListener('click', () => {
-      const prev = document.getElementById('html-rendered-preview');
-      const raw = document.getElementById('html-raw-code');
-      const btn = document.getElementById('btn-toggle-html');
-      if (raw.classList.contains('hidden')) {
-        raw.classList.remove('hidden');
-        prev.classList.add('hidden');
-        btn.textContent = "Toggle Rendered View";
-      } else {
-        raw.classList.add('hidden');
-        prev.classList.remove('hidden');
-        btn.textContent = "Toggle Raw HTML";
-      }
-    });
-
-    // ==========================================
-    // QUEUE & GOOGLE DRIVE INTEGRATION
-    // ==========================================
-    function renderQueue() {
-      const tbody = document.getElementById('queue-table-body');
-      const emptyMsg = document.getElementById('queue-empty-msg');
-      const badge = document.getElementById('queue-count');
-
-      const statScanned = document.getElementById('queue-stat-scanned');
-      const statBought = document.getElementById('queue-stat-bought');
-      const statProfit = document.getElementById('queue-stat-profit');
-
-      badge.textContent = state.queue.length;
-
-      // Calculate stats
-      const totalScanned = state.queue.length;
-      const boughtItems = state.queue.filter(i => i.bought);
-      const totalBought = boughtItems.length;
-      const totalProfit = boughtItems.reduce((acc, i) => acc + (i.profit || 0), 0);
-
-      if (statScanned) statScanned.textContent = `${totalScanned} item${totalScanned !== 1 ? 's' : ''}`;
-      if (statBought) statBought.textContent = `${totalBought} item${totalBought !== 1 ? 's' : ''}`;
-      if (statProfit) {
-        statProfit.textContent = `${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}`;
-        statProfit.className = totalProfit >= 0 ? "text-base text-emerald-800 font-black" : "text-base text-rose-800 font-black";
-      }
-
-      if (state.queue.length === 0) {
-        tbody.innerHTML = '';
-        emptyMsg.classList.remove('hidden');
-        return;
-      }
-
-      emptyMsg.classList.add('hidden');
-      tbody.innerHTML = state.queue.map((item, idx) => `
-        <tr class="hover:bg-[#f4f8f3] text-[#2c2016] transition">
-          <td class="py-2.5 px-3">
-            <strong class="block font-semibold text-[#1c140c]">${item.name}</strong>
-            <span class="text-[11px] text-[#587654]">${item.maker || 'Unmarked'}</span>
-          </td>
-          <td class="py-2.5 px-3 text-[#587654]">${item.verdict || 'Scouted'}</td>
-          <td class="py-2.5 px-3 text-[#b8860b] font-bold font-mono">$${item.comp.toFixed(2)}</td>
-          <td class="py-2.5 px-3 font-mono">
-            ${item.bought ? `<span class="text-[#244220] font-black">$${item.buy.toFixed(2)}</span>` : `<span class="text-[#778c74]">—</span>`}
-          </td>
-          <td class="py-2.5 px-3 font-bold font-mono ${item.profit >= 0 ? 'text-[#244220]' : 'text-rose-800'}">
-            ${item.profit >= 0 ? '+' : ''}$${item.profit.toFixed(2)}
-          </td>
-          <td class="py-2.5 px-3 text-[#1c140c] font-mono">$${item.target3x.toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-right whitespace-nowrap">
-            ${item.bought 
-              ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-900 border border-emerald-400 rounded-lg text-[11px] font-bold mr-1">✅ Bought ☁️</span>`
-              : `<button onclick="markQueueItemBought(${idx})" class="px-2.5 py-1 bg-emerald-800 hover:bg-emerald-700 text-[#f5f8f4] text-[11px] font-bold rounded-lg shadow mr-1 transition">Buy ($)</button>`
-            }
-            <button onclick="loadQueueItem(${idx})" class="px-2 py-1 bg-[#edf4eb] hover:bg-[#e0ece0] border border-[#8fad8c] text-[11px] font-semibold rounded text-[#2c3d2a] mr-1">Load</button>
-            <button onclick="deleteQueueItem(${idx})" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-[11px] rounded text-rose-800 font-bold">✕</button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    window.markQueueItemBought = function(idx) {
-      const item = state.queue[idx];
-      if (!item) return;
-
-      const defaultPrice = item.buy > 0 ? item.buy.toFixed(2) : (item.target3x > 0 ? item.target3x.toFixed(2) : "10.00");
-      const userPrice = prompt(`Enter purchase price paid for "${item.name}" ($):`, defaultPrice);
-      if (userPrice === null) return;
-
-      const price = parseFloat(userPrice) || 0;
-      item.buy = price;
-      item.bought = true;
-
-      // Recalculate profit
-      const gross = item.comp + (item.shipTier === 'fragile' ? 15.00 : 8.00);
-      const fee = (gross * 0.1325) + 0.40;
-      const shipCost = item.shipTier === 'fragile' ? 17.50 : 9.00;
-      item.profit = gross - fee - shipCost - price;
-
-      try {
-        localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-      } catch (e) {}
-
-      renderQueue();
-
-      // Auto-sync item to Google Drive
-      const payload = {
-        dateAdded: new Date().toISOString().slice(0, 10),
-        name: item.name,
-        maker: item.maker,
-        confidence: "Verified",
-        comp: item.comp,
-        buy: price,
-        gross: gross,
-        ebayFee: fee,
-        netPayout: gross - fee - shipCost,
-        profit: item.profit,
-        roi: `${price > 0 ? Math.round((item.profit/price)*100) : 0}%`,
-        target3x: item.target3x,
-        target2x: item.target3x * 1.5,
-        verdict: item.verdict,
-        seoTitle: item.name,
-        category: "Pottery & Glass",
-        era: "Vintage",
-        material: "Ceramic / Glass",
-        dimensions: "",
-        condition: "Good vintage condition"
-      };
-
-      sendToGoogleDrive([payload], `"${item.name}" marked as Bought & auto-synced to Google Drive! ☁️`);
-      showToast(`Saved as Bought ($${price.toFixed(2)}) & auto-synced to Drive! ☁️`, "✅");
-    };
-
-    window.loadQueueItem = function(idx) {
-      const item = state.queue[idx];
-      if (!item) return;
-
-      document.getElementById('input-item-name').value = item.name;
-      document.getElementById('input-maker').value = item.maker;
-      document.getElementById('input-comp-price').value = item.comp.toFixed(2);
-      document.getElementById('input-buy-cost').value = item.buy.toFixed(2);
-      document.getElementById('input-ship-tier').value = item.shipTier;
-      
-      calculateFinancials();
-      updateStudio();
-      switchTab('studio');
-      showToast(`Loaded "${item.name}"`);
-    };
-
-    window.deleteQueueItem = function(idx) {
-      state.queue.splice(idx, 1);
-      try {
-        localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-      } catch (e) {}
-      renderQueue();
-      showToast("Item deleted from session history");
-    };
-
-    document.getElementById('btn-clear-queue').addEventListener('click', () => {
-      if (state.queue.length === 0) return;
-      state.queue = [];
-      try {
-        localStorage.setItem('yami_queue', JSON.stringify(state.queue));
-      } catch (e) {}
-      renderQueue();
-      showToast("History cleared!");
-    });
-
-    document.getElementById('btn-export-csv').addEventListener('click', () => {
-      if (state.queue.length === 0) {
-        showToast("Queue is empty, nothing to export!", "⚠️");
-        return;
-      }
-
-      let csv = "ID,Item Name,Maker,Comp Price,Buy Cost,Estimated Profit,3x Target Buy Limit,Status\n";
-      state.queue.forEach(i => {
-        csv += `"${i.id}","${i.name.replace(/"/g, '""')}","${(i.maker||'').replace(/"/g, '""')}",${i.comp},${i.buy},${i.profit},${i.target3x},"${i.bought ? 'BOUGHT' : 'SCANNED'}"\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `yamis_sourcing_session_${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast("Exported session history to CSV! 📥");
-    });
-// ==========================================
-    // SETTINGS PANEL & GEMINI KEY PERSISTENCE
-    // ==========================================
-    const keyInput = document.getElementById('set-gemini-key');
-    const keyBadge = document.getElementById('gemini-key-status');
-
-    function updateKeyBadge() {
-      if (state.settings.geminiKey) {
-        keyBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#587654]"></span> Gemini AI Vision Ready';
-        keyInput.value = state.settings.geminiKey;
-      } else {
-        keyBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#b8860b]"></span> Offline Comp Mode (Set Key in ⚙️)';
-      }
-    }
-
-    document.getElementById('btn-save-key').addEventListener('click', () => {
-      const val = keyInput.value.trim();
-      state.settings.geminiKey = val;
-      localStorage.setItem('yamis_gemini_api_key', val);
-      updateKeyBadge();
-      showToast(val ? "Gemini API key saved! ✨" : "Key cleared");
-    });
-
-    document.getElementById('btn-toggle-key-view').addEventListener('click', () => {
-      const btn = document.getElementById('btn-toggle-key-view');
-      if (keyInput.type === 'password') {
-        keyInput.type = 'text';
-        btn.textContent = 'Hide';
-      } else {
-        keyInput.type = 'password';
-        btn.textContent = 'Show';
-      }
-    });
-
-    document.getElementById('btn-save-settings').addEventListener('click', () => {
-      state.settings.feeRate = parseFloat(document.getElementById('set-fee-rate').value) || 13.25;
-      state.settings.stdShip = parseFloat(document.getElementById('set-std-ship').value) || 8.00;
-      state.settings.gdriveWebhook = (document.getElementById('set-gdrive-webhook').value || '').trim();
-      state.settings.gdriveAutosync = document.getElementById('set-gdrive-autosync').checked;
-
-      try {
-        localStorage.setItem('yami_settings', JSON.stringify(state.settings));
-      } catch (e) {}
-
-      document.getElementById('calc-fee-rate-label').textContent = `${state.settings.feeRate}%`;
-      calculateFinancials();
-      showToast("All settings saved successfully!");
-    });
-
-    document.getElementById('btn-reset-settings').addEventListener('click', () => {
-      document.getElementById('set-fee-rate').value = "13.25";
-      document.getElementById('set-std-ship').value = "8.00";
-      showToast("Reset to default fee settings");
-    });
-
-    // Initialize application
-    window.addEventListener('DOMContentLoaded', () => {
-      updateKeyBadge();
-      const webhookInp = document.getElementById('set-gdrive-webhook');
-      if (webhookInp && state.settings.gdriveWebhook) {
-        webhookInp.value = state.settings.gdriveWebhook;
-      }
       const autoSyncCheck = document.getElementById('set-gdrive-autosync');
-      if (autoSyncCheck) {
-        autoSyncCheck.checked = !!state.settings.gdriveAutosync;
-      }
-      calculateFinancials();
+      if (autoSyncCheck) autoSyncCheck.checked = !!state.settings.gdriveAutosync;
+      const feeInp = document.getElementById('set-fee-rate');
+      if (feeInp) feeInp.value = state.settings.feeRate || 13.25;
+      const stdShipInp = document.getElementById('set-std-ship');
+      if (stdShipInp) stdShipInp.value = state.settings.stdShip || 8.00;
+      renderPhotoTray();
       renderQueue();
+      calculateFinancials();
     });
-  </script>
-</body>
-</html>
+  </script></body></html>
 
